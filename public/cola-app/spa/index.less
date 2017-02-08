@@ -1,0 +1,89 @@
+@import "../.global.less";
+
+.ui.layer {
+	background: white;
+	overflow: hidden;
+
+	> .v-box {
+		height: 100%;
+	}
+
+	&.frame, &.browser {
+		> .v-box > .header-bar {
+			background: @primaryColor !important;
+			color: #fff !important;
+			height: @header-bar-height;
+			vertical-align: top;
+			> .back-button {
+				float: left;
+				color: #fff;
+				background: transparent;
+				width: 3em;
+				line-height: @header-bar-height;
+				padding: 0 !important;
+			}
+			> .title {
+				line-height: @header-bar-height;
+				color: #fff;
+				font-size: 110%;
+				text-align: left;
+			}
+		}
+		> .v-box > .ui.iframe {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: @header-bar-height;
+			bottom: 0;
+		}
+	}
+
+	&.open {
+		> .v-box > .header-bar {
+			background: transparent !important;
+			> .back-button {
+				position: absolute;
+				.back-button();
+			}
+			> .title {
+				display: none;
+				text-align: left;
+			}
+		}
+		> .v-box > .ui.iframe {
+			height: 100%;
+		}
+	}
+
+	&.free {
+		> .v-box > .header-bar {
+			display: none;
+		}
+		> .v-box >.flex-box {
+			overflow: hidden;
+			> .ui.iframe {
+				height: 100%;
+			}
+		}
+	}
+}
+
+.no-header {
+	.header-bar {
+		display: none;
+	}
+}
+
+#cacheDimmer,#errorDimmer {
+	z-index: 99999;
+}
+
+.v-box {
+	overflow-x: hidden;
+	> .box {
+		overflow-x: hidden;
+	}
+	> .flex-box {
+		overflow-x: hidden;
+	}
+}
