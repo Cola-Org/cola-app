@@ -60,7 +60,7 @@ copy dest目录下的所有文件到应用目录下
 ##不断完善中,在此过程中会出现不稳定情况还请等待发布版本……
 
 配置系统服务地址：
-请到/common/common.js 修改对应参数
+请到/common/app.js 修改对应参数
 ```
  properties = {
       mainView: "./frame/main", //系统主框架界面

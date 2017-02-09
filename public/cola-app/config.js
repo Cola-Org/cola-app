@@ -1,12 +1,11 @@
 /* 系统默认值 */
-App.prop({
+App.setProp({
 	language: "zh",
 	appTitle: "Cola-App",
-	defaultRouterPath: "/spa/home",
+	"spa.defaultRouterPath": "/spa/home",
 	// REPLACE_START
 	// 开发状态下的默认值，在Build时此段内容将被替换
-	liveMessage: false,
-	domainRegExp: /^https*:\/\/www\.cola-shell\.com\//
+	// liveMessage: false
 	// REPLACE_END
 });
 

@@ -24,7 +24,7 @@ cola((model)->
 			contentType: "application/json"
 		}).done((result) ->
 			cola.widget("containerSignIn").removeClass("loading")
-			unless result.type
+			unless result.authenticated
 				showMessage(result.message)
 				return
 			if model.get("cacheInfo") then  $.cookie("_userName", model.get("userName"), {path: "/", expires: 365})

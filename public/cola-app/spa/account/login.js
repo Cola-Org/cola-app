@@ -15,7 +15,7 @@ cola(function (model) {
 			var data = model.get();
 			if (data.validate()) {
 				cola.widget("containerSignIn").showDimmer();
-				$.post(App.prop("service.login"), model.get()).done(function (authState) {
+				$.post(App.prop("service.login", "./service/account/login"), model.get()).done(function (authState) {
 					cola.widget("containerSignIn").hideDimmer();
 					App.setReturnValue(authState.authenticated);
 

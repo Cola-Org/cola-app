@@ -7,7 +7,7 @@ spaUrls = [
 	'/spa/my'
 ]
 router.get spaUrls, (req, res, next) ->
-	res.render 'cola-app/spa/index'
+	res.render 'cola-app/spa/shell'
 
 router.get '/frame/main', (req, res, next) ->
 	if req.session.authenticated

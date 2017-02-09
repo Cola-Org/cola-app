@@ -14,7 +14,7 @@
 	}
 
 	cola.setting("routerMode", "state");
-	cola.setting("defaultRouterPath", defaultPath || App.prop("defaultRouterPath"));
+	cola.setting("defaultRouterPath", defaultPath || App.prop("spa.efaultRouterPath", "/home"));
 	cola.setting("routerContextPath", contextPath);
 
 	var appTitle = cola.resource("appTitle", App.prop("appTitle"));
@@ -27,7 +27,7 @@
 				level: (config.level == null) ? 1 : config.level,
 				class: config.class,
 				animation: config.animation,
-				authRequired: (config.authRequired == undefined) ? App.prop("defaultAuthRequired") : config.authRequired,
+				authRequired: (config.authRequired == undefined) ? App.prop("spa.defaultAuthRequired", false) : config.authRequired,
 				htmlUrl: config.htmlUrl || function() {
 					var path = location.pathname;
 					if (contextPath) path = path.substring(contextPath.length);
@@ -84,10 +84,10 @@
 		if (router.name != "link" &&　router.name != "browser") {
 			var i = url.indexOf("?");
 			if (i > 0) {
-				url = url.substring(0, i) + App.prop("htmlSuffix") + url.substring(i);
+				url = url.substring(0, i) + App.prop("spa.htmlSuffix", "") + url.substring(i);
 			}
 			else {
-				url = url + App.prop("htmlSuffix");
+				url = url + App.prop("spa.htmlSuffix", "");
 			}
 		}
 
@@ -139,7 +139,7 @@
 					mainViewLoaded = true;
 
 					cola.widget("viewMain").load({
-						url: preprocessHtmlUrl(App.prop("mainView"), nextRouter),
+						url: preprocessHtmlUrl(App.prop("spa.mainView", "./cola-app/spa/main-channel-bottom"), nextRouter),
 						jsUrl: "$",
 						cssUrl: "$"
 					}, function () {
@@ -307,7 +307,7 @@
 								contextKey: "subView",
 								"c-widget": {
 									$type: "subView",
-									timeout: App.prop("cardLoadingTimeout"),
+									timeout: App.prop("spa.cardLoadingTimeout", 1000 * 10),
 									loadError: function(self, arg) {
 										if (arg.error && arg.error.status == "timeout") {
 											return App.trigger("cardTimeout", {
@@ -603,10 +603,10 @@
 		}
 	};
 
-	$.get(App.prop("service.sysInfo")).done(function (sysInfo) {
-		App.prop("sysInfoRetrieved", true);
+	$.get(App.prop("service.sysInfo", "./service/sys/info")).done(function (sysInfo) {
+		App.setProp("sysInfoRetrieved", true);
 
-		App.prop("availableVersion", sysInfo.availableLatestVersion);
+		App.setProp("availableVersion", sysInfo.availableLatestVersion);
 
 		App.boardcastMessage({
 			type: "authStateChange",
@@ -641,13 +641,13 @@
 	cola(function (model) {
 		var hasAuthenticated = false;
 		$(window).on("authStateChange", function (event, data) {
-			App.prop("authenticated", data.authenticated);
+			App.setProp("authenticated", data.authenticated);
 			if (data.authenticated) {
 				hasAuthenticated = true;
-				App.prop("authInfo", data.authInfo);
+				App.setProp("authInfo", data.authInfo);
 
-				if (App.prop("liveMessage")) {
-					$.get(App.prop("service.messageSummary")).done(function (data) {
+				if (App.prop("spa.liveMessage")) {
+					$.get(App.prop("service.messageSummary", "./service/message/summary")).done(function (data) {
 						App.boardcastMessage({
 							type: "unreadChatMessageChange",
 							data: {count: data.unreadChatMessages}
@@ -660,7 +660,7 @@
 				}
 			}
 			else {
-				App.prop("authInfo", null);
+				App.setProp("authInfo", null);
 				if (hasAuthenticated) hideLayers(0, false);
 			}
 		});
@@ -668,10 +668,11 @@
 		var errorCount = 0;
 
 		function longPolling() {
-			var options = {};
-			if (App.prop("longPollingTimeout")) options.timeout = App.prop("longPollingTimeout");
+			var options = {
+				timeout: App.prop("spa.longPollingTimeout")
+			}, longPollingInterval = App.prop("spa.longPollingInterval", 2000);
 
-			$.ajax(App.prop("service.messagePull"), options).done(function (messages) {
+			$.ajax(App.prop("service.messagePull", "./service/message/pull"), options).done(function (messages) {
 				if (messages) {
 					errorCount = 0;
 					for (var i = 0; i < messages.length; i++) {
@@ -679,19 +680,19 @@
 					}
 				}
 
-				setTimeout(longPolling, App.prop("longPollingInterval"));
+				setTimeout(longPolling, longPollingInterval);
 			}).error(function (xhr, status, ex) {
 				if (status == "timeout") {
-					setTimeout(longPolling, App.prop("longPollingInterval"));
+					setTimeout(longPolling, longPollingInterval);
 				}
 				else {
 					errorCount++;
-					setTimeout(longPolling, 5000 * Math.pow(2, Math.min(6, (errorCount - 1))));
+					setTimeout(longPolling, (longPollingInterval * 2) * Math.pow(2, Math.min(6, (errorCount - 1))));
 				}
 			});
 		}
 
-		if (App.prop("liveMessage")) setTimeout(longPolling, 1000);
+		if (App.prop("spa.liveMessage")) setTimeout(longPolling, 1000);
 
 		function plusReady() {
 			if (window._splashClosed) {

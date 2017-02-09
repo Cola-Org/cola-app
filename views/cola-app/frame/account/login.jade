@@ -1,6 +1,6 @@
 extends ../../.cola-page-pc
 append head
-	link(rel="stylesheet", type="text/css", href="./frame/account/login.css")
+	link(rel="stylesheet", type="text/css", href="./cola-app/frame/account/login.css")
 block body
 	.v-box.account-page
 		.box.ui.menu.secondary.attached.page-header
@@ -27,4 +27,5 @@ block body
 						.field
 							.ui.message.error
 append scripts
-	script(src="./frame/account/login.js")
+	script(src="./resources/jquery/jquery.cookie.js")
+	script(src="./cola-app/frame/account/login.js")

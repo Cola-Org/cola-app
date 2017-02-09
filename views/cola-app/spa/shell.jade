@@ -1,7 +1,7 @@
 extends ../.cola-page
 
 append head
-	link(rel="stylesheet", type="text/css", href="./cola-app/spa/index.css")
+	link(rel="stylesheet", type="text/css", href="./cola-app/spa/shell.css")
 
 block body
 	body
@@ -12,6 +12,7 @@ block body
 			#cacheLoader.ui.text.loader(c-bind="loaderText")
 
 append scripts
-	script(src="./cola-app/config.js")
 	script(src="./resources/jquery/jquery.cookie.js")
-	script(src="./cola-app/spa/index.js")
+	script(src="./cola-app/spa/app.js")
+	script(src="./cola-app/config.js")
+	script(src="./cola-app/spa/shell.js")
