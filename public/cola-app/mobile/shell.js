@@ -14,7 +14,7 @@
 	}
 
 	cola.setting("routerMode", "state");
-	cola.setting("defaultRouterPath", defaultPath || App.prop("spa.efaultRouterPath", "/home"));
+	cola.setting("defaultRouterPath", defaultPath || App.prop("mobile.efaultRouterPath", "/home"));
 	cola.setting("routerContextPath", contextPath);
 
 	var appTitle = cola.resource("appTitle", App.prop("appTitle"));
@@ -27,7 +27,7 @@
 				level: (config.level == null) ? 1 : config.level,
 				class: config.class,
 				animation: config.animation,
-				authRequired: (config.authRequired == undefined) ? App.prop("spa.defaultAuthRequired", false) : config.authRequired,
+				authRequired: (config.authRequired == undefined) ? App.prop("mobile.defaultAuthRequired", false) : config.authRequired,
 				htmlUrl: config.htmlUrl || function() {
 					var path = location.pathname;
 					if (contextPath) path = path.substring(contextPath.length);
@@ -84,10 +84,10 @@
 		if (router.name != "link" &&　router.name != "browser") {
 			var i = url.indexOf("?");
 			if (i > 0) {
-				url = url.substring(0, i) + App.prop("spa.htmlSuffix", "") + url.substring(i);
+				url = url.substring(0, i) + App.prop("mobile.htmlSuffix", "") + url.substring(i);
 			}
 			else {
-				url = url + App.prop("spa.htmlSuffix", "");
+				url = url + App.prop("mobile.htmlSuffix", "");
 			}
 		}
 
@@ -139,7 +139,7 @@
 					mainViewLoaded = true;
 
 					cola.widget("viewMain").load({
-						url: preprocessHtmlUrl(App.prop("spa.mainView", "./cola-app/spa/main-channel-bottom"), nextRouter),
+						url: preprocessHtmlUrl(App.prop("mobile.mainView", "./cola-app/mobile/main-channel-bottom"), nextRouter),
 						jsUrl: "$",
 						cssUrl: "$"
 					}, function () {
@@ -307,7 +307,7 @@
 								contextKey: "subView",
 								"c-widget": {
 									$type: "subView",
-									timeout: App.prop("spa.cardLoadingTimeout", 1000 * 10),
+									timeout: App.prop("mobile.cardLoadingTimeout", 1000 * 10),
 									loadError: function(self, arg) {
 										if (arg.error && arg.error.status == "timeout") {
 											return App.trigger("cardTimeout", {
@@ -646,7 +646,7 @@
 				hasAuthenticated = true;
 				App.setProp("authInfo", data.authInfo);
 
-				if (App.prop("spa.liveMessage")) {
+				if (App.prop("mobile.liveMessage")) {
 					$.get(App.prop("service.messageSummary", "./service/message/summary")).done(function (data) {
 						App.boardcastMessage({
 							type: "unreadChatMessageChange",
@@ -669,8 +669,8 @@
 
 		function longPolling() {
 			var options = {
-				timeout: App.prop("spa.longPollingTimeout")
-			}, longPollingInterval = App.prop("spa.longPollingInterval", 2000);
+				timeout: App.prop("mobile.longPollingTimeout")
+			}, longPollingInterval = App.prop("mobile.longPollingInterval", 2000);
 
 			$.ajax(App.prop("service.messagePull", "./service/message/pull"), options).done(function (messages) {
 				if (messages) {
@@ -692,7 +692,7 @@
 			});
 		}
 
-		if (App.prop("spa.liveMessage")) setTimeout(longPolling, 1000);
+		if (App.prop("mobile.liveMessage")) setTimeout(longPolling, 1000);
 
 		function plusReady() {
 			if (window._splashClosed) {

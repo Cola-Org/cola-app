@@ -107,7 +107,7 @@ App.goLogin = function (nextPath, callback) {
 		return path || "";
 	}
 
-	var loginPath = trimPath(App.prop("spa.loginPath", "/login"));
+	var loginPath = trimPath(App.prop("mobile.loginPath", "/login"));
 	if (trimPath(cola.getCurrentRoutePath()) == loginPath) {
 		return;
 	}
