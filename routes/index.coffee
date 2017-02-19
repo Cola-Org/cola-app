@@ -1,12 +1,12 @@
 express = require 'express'
 router = express.Router()
 
-spaUrls = [
+mobileUrls = [
 	'/spa'
 	'/spa/home'
 	'/spa/my'
 ]
-router.get spaUrls, (req, res, next) ->
+router.get mobileUrls, (req, res, next) ->
 	res.render 'cola-app/spa/shell'
 
 router.get '/frame/main', (req, res, next) ->
@@ -14,7 +14,7 @@ router.get '/frame/main', (req, res, next) ->
 		res.render 'cola-app/frame/main'
 	else
 		res.render 'cola-app/frame/account/login'
-			
+
 router.get ['/', '/readme'], (req, res, next) ->
 	res.render 'index'
 
