@@ -50,7 +50,7 @@ App.open = function (path, config) {
 	else if (path.match(/^https*:/)) {
 		var domainRegExp = App.prop("domainRegExp");
 		if (this.getPlus()) {
-			var match = domainRegExp && path.match(domainRegExp);
+			 var match = domainRegExp && path.match(domainRegExp);
 			if (match) {
 				path = "link?" + encodeURIComponent(path.substring(match[0].length));
 				rootWindow.setRoutePath(window, path, {
