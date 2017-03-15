@@ -1,4 +1,4 @@
-/*! Cola UI - 0.9.8
+/*! Cola UI - 1.0.6
  * Copyright (c) 2002-2016 BSTEK Corp. All rights reserved.
  *
  * This file is dual-licensed under the AGPLv3 (http://www.gnu.org/licenses/agpl-3.0.html)
@@ -8,7 +8,7 @@
  * at http://www.bstek.com/contact.
  */
 (function() {
-  var ACTIVE_PINCH_REG, ACTIVE_ROTATE_REG, ALIAS_REGEXP, EntityIndex, IGNORE_NODES, LinkedList, ON_NODE_REMOVED_KEY, PAN_VERTICAL_events, Page, SWIPE_VERTICAL_events, TYPE_SEVERITY, USER_DATA_KEY, WIDGET_TAGS_REGISTRY, _$, _DOMNodeInsertedListener, _DOMNodeRemovedListener, _Entity, _EntityList, _ExpressionDataModel, _ExpressionScope, _SYS_PARAMS, _compileResourceUrl, _compileWidgetAttribute, _compileWidgetDom, _cssCache, _destroyDomBinding, _destroyRenderableElement, _doRenderDomTemplate, _evalDataPath, _extendWidget, _extractDirtyTree, _filterCollection, _filterEntity, _findRouter, _findWidgetConfig, _getData, _getEntityPath, _getHashPath, _getNodeDataId, _jsCache, _loadCss, _loadHtml, _loadJs, _matchValue, _nodesToBeRemove, _numberWords, _onHashChange, _onStateChange, _processEntity, _processEntityList, _setValue, _sortCollection, _switchRouter, _toJSON, _triggerWatcher, _unloadCss, _unwatch, _watch, appendChild, browser, buildContent, cleanStamp, cola, colaEventRegistry, createContentPart, createNodeForAppend, currentRoutePath, currentRouter, defaultActionTimestamp, defaultDataTypes, definedSetting, dictionaryMap, digestExpression, doMergeDefinitions, doms, exceptionStack, getDefinition, hasDefinition, ignoreRouterSettingChange, key, keyValuesMap, oldIE, originalAjax, os, resourceStore, routerRegistry, setAttrs, setting, splitExpression, sprintf, tagSplitter, trimPath, typeRegistry, uniqueIdSeed, value, xCreate,
+  var ACTIVE_PINCH_REG, ACTIVE_ROTATE_REG, ALIAS_REGEXP, EntityIndex, IGNORE_NODES, LinkedList, ON_NODE_REMOVED_KEY, PAN_VERTICAL_events, Page, SWIPE_VERTICAL_events, TYPE_SEVERITY, USER_DATA_KEY, WIDGET_TAGS_REGISTRY, _$, _DOMNodeInsertedListener, _DOMNodeRemovedListener, _Entity, _EntityList, _ExpressionDataModel, _ExpressionScope, _SYS_PARAMS, _compileResourceUrl, _compileWidgetAttribute, _compileWidgetDom, _cssCache, _destroyDomBinding, _destroyRenderableElement, _doRenderDomTemplate, _evalDataPath, _extendWidget, _extractDirtyTree, _filterCollection, _filterEntity, _findRouter, _findWidgetConfig, _getData, _getEntityPath, _getHashPath, _getNodeDataId, _jsCache, _loadCss, _loadHtml, _loadJs, _matchValue, _nodesToBeRemove, _numberWords, _onHashChange, _onStateChange, _processEntity, _processEntityList, _setValue, _sortCollection, _switchRouter, _toJSON, _triggerWatcher, _unloadCss, _unwatch, _watch, appendChild, browser, buildContent, cleanStamp, cola, colaEventRegistry, createContentPart, createNodeForAppend, currentRoutePath, currentRouter, defaultActionTimestamp, defaultDataTypes, definedSetting, dictionaryMap, digestExpression, doMergeDefinitions, doms, exceptionStack, getDefinition, hasDefinition, ignoreRouterSettingChange, key, keyValuesMap, oldIE, originalAjax, os, resourceStore, routerRegistry, setAttrs, setting, sprintf, tagSplitter, trimPath, typeRegistry, uniqueIdSeed, value, xCreate,
     slice = [].slice,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
@@ -1122,7 +1122,8 @@
     "cola.messageBox.question.title": "Confirm",
     "cola.message.approve": "Ok",
     "cola.message.deny": "Cancel",
-    "cola.pager.info": "Page:{0}\/{1}"
+    "cola.pager.info": "Page:{0}\/{1}({2})",
+    "cola.pager.pageSize": "Page Size:"
   });
 
   _toJSON = function(data) {
@@ -2213,45 +2214,6 @@
     return exp;
   };
 
-  splitExpression = function(text, separator) {
-    var c, i, len, p, part, parts, quota, separatorCharCode;
-    separatorCharCode = separator.charCodeAt(0);
-    parts = null;
-    p = 0;
-    i = 0;
-    len = text.length;
-    while (i < len) {
-      c = text.charCodeAt(i);
-      if (c === separatorCharCode && !quota) {
-        part = text.substring(p, i);
-        if (parts == null) {
-          parts = [];
-        }
-        parts.push(cola.util.trim(part));
-        p = i + 1;
-      } else {
-        if (c === 39 || c === 34) {
-          if (quota) {
-            if (quota === c) {
-              quota = false;
-            }
-          } else {
-            quota = c;
-          }
-        }
-      }
-      i++;
-    }
-    if (p < len) {
-      part = text.substring(p);
-      if (parts == null) {
-        parts = [];
-      }
-      parts.push(cola.util.trim(part));
-    }
-    return parts;
-  };
-
   cola.Expression = (function() {
     function Expression(exprStr) {
       var fc, i, l, len1, path, ref, watchPathStr, watchPaths;
@@ -2276,9 +2238,6 @@
       if (fc === 61) {
         exprStr = exprStr.substring(1);
         this.isStatic = true;
-      } else if (fc === 63) {
-        exprStr = exprStr.substring(1);
-        this.isDyna = true;
       }
       this.compile(exprStr);
       if (watchPaths) {
@@ -2370,6 +2329,13 @@
             parts.push("]");
         }
         if (close && pathParts.length) {
+          if (pathParts[0].charCodeAt(0) === 64) {
+            context.isDyna = true;
+            if (context.dynaPathMap == null) {
+              context.dynaPathMap = {};
+            }
+            context.dynaPathMap[pathParts[0].substring(1)] = pathParts.slice(0);
+          }
           path = pathParts.join(".");
           if (!context.paths) {
             context.paths = [path];
@@ -2391,50 +2357,20 @@
     };
 
     Expression.prototype.evaluate = function(scope, loadMode, dataCtx) {
-      var expression, parent, pathInfo, retValue;
-      if (this.isDyna && !(dataCtx != null ? dataCtx.ignoreDynaExpression : void 0)) {
-        retValue = eval(this.script);
-        if (typeof retValue === "string") {
-          expression = cola._compileExpression(retValue);
-          if (dataCtx != null) {
-            dataCtx.dynaExpression = expression;
-          }
+      var dynaPath, originPath, path, ref, retValue;
+      if (this.dynaPathMap) {
+        this.pathReplacement = {};
+        ref = this.dynaPathMap;
+        for (dynaPath in ref) {
+          path = ref[dynaPath];
+          originPath = path.join(".");
+          path[0] = "@" + _getData(scope, dynaPath, "never", dataCtx);
+          this.pathReplacement[originPath] = path.join(".");
         }
-      } else {
-        expression = this;
       }
-      if (expression.writeable) {
-        pathInfo = expression.getParentPathInfo();
-        if (pathInfo.parentPath) {
-          parent = scope.get(pathInfo.parentPath, loadMode, dataCtx);
-          if (parent instanceof cola.EntityList) {
-            parent = parent.current;
-          }
-          if (parent && typeof parent === "object") {
-            retValue = cola.Entity._evalDataPath(parent, pathInfo.property, false, loadMode, null, dataCtx);
-          }
-          if (retValue instanceof cola.Entity || retValue instanceof cola.EntityList) {
-            if (dataCtx != null) {
-              dataCtx.closetEntity = retValue;
-            }
-          } else if (parent instanceof cola.Entity) {
-            if (dataCtx != null) {
-              dataCtx.closetEntity = parent;
-            }
-          }
-        } else {
-          retValue = eval(expression.script);
-          if (retValue instanceof cola.Entity || retValue instanceof cola.EntityList) {
-            if (dataCtx != null) {
-              dataCtx.closetEntity = retValue;
-            }
-          }
-        }
-      } else {
-        retValue = eval(expression.script);
-        if (retValue instanceof cola.Chain) {
-          retValue = retValue._data;
-        }
+      retValue = eval(this.script);
+      if (retValue instanceof cola.Chain) {
+        retValue = retValue._data;
       }
       return retValue;
     };
@@ -2472,6 +2408,9 @@
 
   _getData = function(scope, path, loadMode, dataCtx) {
     var retValue;
+    if (this.pathReplacement) {
+      path = this.pathReplacement[path] || path;
+    }
     retValue = scope.get(path, loadMode, dataCtx);
     if (retValue === void 0 && (dataCtx != null ? dataCtx.vars : void 0)) {
       retValue = dataCtx.vars[path];
@@ -4636,7 +4575,8 @@
     };
 
     Entity.prototype.toJSON = function(options) {
-      var data, json, oldData, prop, simpleValue, state;
+      var data, entityId, json, oldData, prop, simpleValue, state;
+      entityId = (options != null ? options.entityId : void 0) || false;
       state = (options != null ? options.state : void 0) || false;
       oldData = (options != null ? options.oldData : void 0) || false;
       simpleValue = (options != null ? options.simpleValue : void 0) || false;
@@ -4658,6 +4598,9 @@
           }
         }
         json[prop] = value;
+      }
+      if (entityId) {
+        json.$entityId = this.id;
       }
       if (state) {
         json.$state = this.state;
@@ -5931,97 +5874,6 @@
 
 
   /*
-  dirty tree
-   */
-
-  cola.util.dirtyTree = function(data, options) {
-    var context;
-    if (!data) {
-      return void 0;
-    }
-    context = {
-      tree: null,
-      parent: null,
-      parentProperty: null,
-      isList: false,
-      entityPath: []
-    };
-    _extractDirtyTree(data, context, options || {});
-    return context.tree;
-  };
-
-  _processEntity = function(entity, context, options) {
-    var base, data, json, name1, prop;
-    if (entity.state === _Entity.STATE_NONE) {
-      return;
-    }
-    json = entity.toJSON({
-      simpleValue: true,
-      state: true,
-      oldData: options.oldData
-    });
-    if (context.parent) {
-      if (context.isList) {
-        if ((base = context.parent)[name1 = context.parentProperty] == null) {
-          base[name1] = [];
-        }
-        context.parent[context.parentProperty].push(json);
-      } else {
-        context.parent[context.parentProperty] = json;
-      }
-    } else {
-      if (context.isList) {
-        if (context.tree == null) {
-          context.tree = [];
-        }
-        context.tree.push(json);
-      } else {
-        context.tree = json;
-      }
-    }
-    context.parent = json;
-    data = entity._data;
-    for (prop in data) {
-      value = data[prop];
-      if (prop.charCodeAt(0) === 36) {
-        continue;
-      }
-      if (value && (value instanceof _Entity || value instanceof _EntityList)) {
-        context.parentProperty = prop;
-        _extractDirtyTree(value, context);
-      }
-    }
-    context.parent = null;
-  };
-
-  _processEntityList = function(entityList, context, options) {
-    var next, page;
-    page = entityList._first;
-    if (page) {
-      next = page._first;
-      while (page) {
-        if (next) {
-          _processEntity(next, context, options);
-          next = next._next;
-        } else {
-          page = page._next;
-          next = page != null ? page._first : void 0;
-        }
-      }
-    }
-  };
-
-  _extractDirtyTree = function(data, context, options) {
-    context.isList = value instanceof _EntityList;
-    if (context.isList) {
-      _processEntityList(data, context, options);
-    } else {
-      _processEntity(data, context, options);
-    }
-  };
-
-
-  /*
   index
    */
 
@@ -6402,7 +6254,6 @@
       if (this._watchAllMessages || this._watchPath === path) {
         return;
       }
-      this._unwatchPath();
       if (path) {
         this._watchPath = paths = [];
         parent = this.parent;
@@ -6427,7 +6278,7 @@
       }
     };
 
-    SubScope.prototype._unwatchPath = function() {
+    SubScope.prototype.unwatchPath = function() {
       var l, len1, p, parent, path;
       if (!this._watchPath) {
         return;
@@ -6453,7 +6304,7 @@
         return;
       }
       this._watchAllMessages = true;
-      this._unwatchPath();
+      this.unwatchPath();
       parent = this.parent;
       if (parent) {
         this._watchPath = ["**"];
@@ -6466,7 +6317,7 @@
 
     SubScope.prototype.destroy = function() {
       if (this.parent) {
-        this._unwatchPath();
+        this.unwatchPath();
       }
     };
 
@@ -6482,18 +6333,6 @@
     }
 
     ExpressionScope.prototype.repeatNotification = true;
-
-    ExpressionScope.prototype._unwatchPath = function() {
-      var l, len1, path, ref;
-      ExpressionScope.__super__._unwatchPath.call(this);
-      if (this.parent && this.expressionDynaPaths) {
-        ref = this.expressionDynaPaths;
-        for (l = 0, len1 = ref.length; l < len1; l++) {
-          path = ref[l];
-          this.parent.data.unbind(path, this);
-        }
-      }
-    };
 
     ExpressionScope.prototype.setExpression = function(expression) {
       var l, len1, path, ref;
@@ -6515,65 +6354,25 @@
           this.watchPath(expression.paths);
         }
       } else {
-        this._unwatchPath();
+        this.unwatchPath();
       }
     };
 
-    ExpressionScope.prototype.evaluate = function(scope, dynaExpressionOnly, loadMode, dataCtx) {
-      var dynaPaths, l, len1, len2, o, path, paths, ref, result;
+    ExpressionScope.prototype.evaluate = function(scope, loadMode, dataCtx) {
+      var ref;
       if (loadMode == null) {
         loadMode = "async";
       }
       if (dataCtx == null) {
         dataCtx = {};
       }
-      if (!this.expression) {
-        return;
-      }
-      if (dynaExpressionOnly && this.dynaExpression) {
-        result = this.dynaExpression.evaluate(scope, loadMode, dataCtx);
-      } else {
-        result = this.expression.evaluate(scope, loadMode, dataCtx);
-        if (this.expression.isDyna && dataCtx.dynaExpression) {
-          this.dynaExpression = dataCtx.dynaExpression;
-          if (this.dynaExpression.raw !== this.dynaExpressionStr) {
-            this.dynaExpressionStr = this.dynaExpression.raw;
-          }
-          if (this.parent && !this.ignoreBind) {
-            if (this.expressionDynaPaths) {
-              ref = this.expressionDynaPaths;
-              for (l = 0, len1 = ref.length; l < len1; l++) {
-                path = ref[l];
-                this.parent.data.unbind(path, this);
-              }
-              delete this.expressionDynaPaths;
-            }
-            paths = this.expression.paths;
-            dynaPaths = this.dynaExpression.paths;
-            if (dynaPaths) {
-              for (o = 0, len2 = dynaPaths.length; o < len2; o++) {
-                path = dynaPaths[o];
-                if (!paths || paths.indexOf(path) < 0) {
-                  if (!this.expressionDynaPaths) {
-                    this.expressionDynaPaths = [path];
-                  } else {
-                    this.expressionDynaPaths.push(path);
-                  }
-                  this.parent.data.bind(path, this);
-                }
-              }
-            }
-          }
-        }
-      }
-      return result;
+      return (ref = this.expression) != null ? ref.evaluate(scope, loadMode, dataCtx) : void 0;
     };
 
     ExpressionScope.prototype.isParentOfTarget = function(changedPath) {
-      var expressionDynaPaths, expressionPaths, i, isParent, l, len1, len2, len3, len4, o, part, q, targetPart, targetPath, u;
+      var expressionPaths, i, isParent, l, len1, len2, o, part, targetPart, targetPath;
       expressionPaths = this.expressionPaths;
-      expressionDynaPaths = this.expressionDynaPaths;
-      if (!expressionPaths.length && !expressionDynaPaths) {
+      if (!expressionPaths.length) {
         return false;
       }
       if (!changedPath) {
@@ -6599,35 +6398,11 @@
             }
           }
           if (isParent) {
-            return 2;
+            return true;
           }
         }
       }
-      if (expressionDynaPaths) {
-        for (q = 0, len3 = expressionDynaPaths.length; q < len3; q++) {
-          targetPath = expressionDynaPaths[q];
-          isParent = true;
-          for (i = u = 0, len4 = changedPath.length; u < len4; i = ++u) {
-            part = changedPath[i];
-            targetPart = targetPath[i].split(".");
-            if (part !== targetPart) {
-              if (targetPart === "**") {
-                continue;
-              } else if (targetPart === "*") {
-                if (i === changedPath.length - 1) {
-                  continue;
-                }
-              }
-              isParent = false;
-              break;
-            }
-          }
-          if (isParent) {
-            return 1;
-          }
-        }
-      }
-      return 0;
+      return false;
     };
 
     return ExpressionScope;
@@ -6660,10 +6435,10 @@
       this.data.setTargetData(data);
     };
 
-    AliasScope.prototype.retrieveData = function(dynaExpressionOnly) {
+    AliasScope.prototype.retrieveData = function() {
       var data;
       cola.util.cancelDelay(this, "retrieve");
-      data = this.evaluate(this, dynaExpressionOnly);
+      data = this.evaluate(this);
       this.setTargetData(data);
     };
 
@@ -6750,7 +6525,7 @@
 
     ItemsScope.prototype.setParent = function(parent) {
       if (this.parent) {
-        this._unwatchPath();
+        this.unwatchPath();
       }
       this.parent = parent;
       this.data = parent.data;
@@ -6771,13 +6546,13 @@
       this._setItems(items);
     };
 
-    ItemsScope.prototype.retrieveData = function(dynaExpressionOnly) {
+    ItemsScope.prototype.retrieveData = function() {
       var items;
       cola.util.cancelDelay(this, "retrieve");
       if (this._retrieveItems) {
-        this._retrieveItems(dynaExpressionOnly);
+        this._retrieveItems();
       } else if (this.expression) {
-        items = this.evaluate(this.parent, dynaExpressionOnly);
+        items = this.evaluate(this.parent);
         this.setItems(items);
       }
     };
@@ -6932,10 +6707,9 @@
     };
 
     ItemsScope.prototype.isWatchPathPreciseMatch = function(changedPath) {
-      var expressionDynaPaths, expressionPaths, i, isMatch, l, len1, len2, len3, len4, o, part, q, targetPart, targetPath, u;
+      var expressionPaths, i, isMatch, l, len1, len2, o, part, targetPart, targetPath;
       expressionPaths = this.expressionPaths;
-      expressionDynaPaths = this.expressionDynaPaths;
-      if (!expressionPaths.length && !expressionDynaPaths) {
+      if (!expressionPaths.length) {
         return false;
       }
       if (!changedPath) {
@@ -6960,40 +6734,21 @@
             }
           }
           if (isMatch) {
-            return 2;
+            return true;
           }
         }
       }
-      if (expressionDynaPaths && expressionDynaPaths.length - changedPath.length < 2) {
-        for (q = 0, len3 = expressionDynaPaths.length; q < len3; q++) {
-          targetPath = expressionDynaPaths[q];
-          isMatch = true;
-          for (i = u = 0, len4 = changedPath.length; u < len4; i = ++u) {
-            part = changedPath[i];
-            targetPart = targetPath[i];
-            if (part !== targetPart) {
-              isMatch = false;
-              break;
-            }
-          }
-          if (isMatch && expressionDynaPaths.length > changedPath.length) {
-            targetPart = expressionDynaPaths[expressionDynaPaths.length - 1];
-            if (targetPart !== "*" || targetPart !== "**") {
-              isMatch = false;
-            }
-          }
-          if (isMatch) {
-            return 2;
-          }
-        }
-      }
-      return 0;
+      return false;
     };
 
     ItemsScope.prototype._processMessage = function(bindingPath, path, type, arg) {
       var allProcessed, i, items, parent, processMoreMessage, ref;
       if (type === cola.constants.MESSAGE_REFRESH) {
-        if (this.isParentOfTarget(path, this.expressionPaths)) {
+        if (arg.originType === cola.constants.MESSAGE_CURRENT_CHANGE && (arg.entityList === this.items || this.isOriginItems(arg.entityList))) {
+          if (typeof this.onCurrentItemChange === "function") {
+            this.onCurrentItemChange(arg);
+          }
+        } else if (this.isParentOfTarget(path)) {
           this.retrieveData();
           this.refreshItems();
           allProcessed = true;
@@ -7001,7 +6756,7 @@
           processMoreMessage = true;
         }
       } else if (type === cola.constants.MESSAGE_PROPERTY_CHANGE) {
-        if (this.isParentOfTarget(path, this.expressionPaths)) {
+        if (this.isParentOfTarget(path)) {
           this.retrieveData();
           this.refreshItems();
           allProcessed = true;
@@ -7018,7 +6773,7 @@
           if (typeof this.onCurrentItemChange === "function") {
             this.onCurrentItemChange(arg);
           }
-        } else if (this.isParentOfTarget(path, this.expressionPaths)) {
+        } else if (this.isParentOfTarget(path)) {
           this.retrieveData();
           this.refreshItems();
           allProcessed = true;
@@ -7057,11 +6812,11 @@
           processMoreMessage = true;
         }
       } else if (type === cola.constants.MESSAGE_LOADING_START) {
-        if (this.isParentOfTarget(path, this.expressionPaths)) {
+        if (this.isParentOfTarget(path)) {
           this.itemsLoadingStart(arg);
         }
       } else if (type === cola.constants.MESSAGE_LOADING_END) {
-        if (this.isParentOfTarget(path, this.expressionPaths)) {
+        if (this.isParentOfTarget(path)) {
           this.itemsLoadingEnd(arg);
         }
       }
@@ -7391,9 +7146,9 @@
             part = path[i];
             if (i === lastIndex) {
               anyPropNode = node["*"];
-            }
-            if (anyPropNode) {
-              this.processDataMessage(anyPropNode, path, type, arg);
+              if (anyPropNode) {
+                this.processDataMessage(anyPropNode, path, type, arg);
+              }
             }
             anyChildNode = node["**"];
             if (anyChildNode) {
@@ -7435,8 +7190,11 @@
       }
       if (notifyChildren) {
         notifyChildren2 = !((cola.constants.MESSAGE_EDITING_STATE_CHANGE <= type && type <= cola.constants.MESSAGE_VALIDATION_STATE_CHANGE)) && !((cola.constants.MESSAGE_LOADING_START <= type && type <= cola.constants.MESSAGE_LOADING_END));
-        if (type === cola.constants.MESSAGE_CURRENT_CHANGE) {
+        if (notifyChildren2 && type === cola.constants.MESSAGE_CURRENT_CHANGE) {
           type = cola.constants.MESSAGE_REFRESH;
+          arg = jQuery.extend({
+            originType: cola.constants.MESSAGE_CURRENT_CHANGE
+          }, arg);
         }
         for (part in node) {
           subNode = node[part];
@@ -7990,55 +7748,18 @@
     };
 
     ElementAttrBinding.prototype.processMessage = function(bindingPath, path, type) {
-      var ref;
       if ((cola.constants.MESSAGE_REFRESH <= type && type <= cola.constants.MESSAGE_CURRENT_CHANGE) || this.watchingMoreMessage) {
-        this.refresh(((ref = this.dynaPaths) != null ? ref.indexOf(bindingPath) : void 0) >= 0);
+        this.refresh();
       }
     };
 
-    ElementAttrBinding.prototype.evaluate = function(dynaExpressionOnly, dataCtx) {
-      var dynaExpression, l, len1, len2, loadMode, o, path, paths, ref, result;
-      loadMode = "async";
-      if (dynaExpressionOnly && this.dynaExpression) {
-        result = this.dynaExpression.evaluate(this.scope, loadMode, dataCtx);
-      } else {
-        result = this.expression.evaluate(this.scope, loadMode, dataCtx);
-        if (this.expression.isDyna && (dataCtx != null ? dataCtx.dynaExpression : void 0)) {
-          dynaExpression = dataCtx.dynaExpression;
-          if (dynaExpression.raw !== this.dynaExpressionStr) {
-            this.dynaExpressionStr = dynaExpression.raw;
-          }
-          if (!this.ignoreBind) {
-            if (this.dynaPaths) {
-              ref = this.dynaPaths;
-              for (l = 0, len1 = ref.length; l < len1; l++) {
-                path = ref[l];
-                this.scope.data.unbind(path, this);
-              }
-            }
-            paths = this.dynaExpression.paths;
-            if (paths) {
-              for (o = 0, len2 = paths.length; o < len2; o++) {
-                path = paths[o];
-                if (this.paths.indexOf(path) < 0) {
-                  if (!this.dynaPaths) {
-                    this.dynaPaths = [path];
-                  } else {
-                    this.dynaPaths.push(path);
-                  }
-                  this.scope.data.bind(path, this);
-                }
-              }
-            }
-          }
-        }
-      }
-      return result;
+    ElementAttrBinding.prototype.evaluate = function(dataCtx) {
+      return this.expression.evaluate(this.scope, "async", dataCtx);
     };
 
-    ElementAttrBinding.prototype._refresh = function(dynaExpressionOnly) {
+    ElementAttrBinding.prototype._refresh = function() {
       var element;
-      value = this.evaluate(dynaExpressionOnly);
+      value = this.evaluate();
       element = this.element;
       element._duringBindingRefresh = true;
       try {
@@ -8048,16 +7769,16 @@
       }
     };
 
-    ElementAttrBinding.prototype.refresh = function(dynaExpressionOnly) {
+    ElementAttrBinding.prototype.refresh = function() {
       if (!this._refresh) {
         return;
       }
       if (this.delay) {
         cola.util.delay(this, "refresh", 100, function() {
-          this._refresh(dynaExpressionOnly);
+          this._refresh();
         });
       } else {
-        this._refresh(dynaExpressionOnly);
+        this._refresh();
       }
     };
 
@@ -8124,6 +7845,126 @@
     "dirty-tree": function(data) {
       return data;
     }
+  };
+
+
+  /*
+  dirty tree
+   */
+
+  cola.util.dirtyTree = function(data, options, context) {
+    if (!data) {
+      return void 0;
+    }
+    if (context == null) {
+      context = {};
+    }
+    context.entityMap = {};
+    return _extractDirtyTree(data, context, options || {});
+  };
+
+  _processEntity = function(entity, context, options) {
+    var data, json, prop, toJSONOptions;
+    toJSONOptions = {
+      simpleValue: true,
+      entityId: options.entityId,
+      state: true,
+      oldData: options.oldData
+    };
+    if (entity.state !== _Entity.STATE_NONE) {
+      json = entity.toJSON(toJSONOptions);
+    }
+    data = entity._data;
+    for (prop in data) {
+      value = data[prop];
+      if (prop.charCodeAt(0) === 36) {
+        continue;
+      }
+      if (value && (value instanceof _Entity || value instanceof _EntityList)) {
+        context.parentProperty = prop;
+        value = _extractDirtyTree(value, context);
+        if (value === null) {
+          json = entity.toJSON(toJSONOptions);
+        }
+        json[prop] = value;
+      }
+    }
+    if (json !== null) {
+      context.entityMap[entity.id] = entity;
+    }
+    return json;
+  };
+
+  _processEntityList = function(entityList, context, options) {
+    var entities, json, next, page;
+    entities = [];
+    page = entityList._first;
+    if (page) {
+      next = page._first;
+      while (page) {
+        if (next) {
+          json = _processEntity(next, context, options);
+          if (json !== null) {
+            entities.push(json);
+          }
+          next = next._next;
+        } else {
+          page = page._next;
+          next = page != null ? page._first : void 0;
+        }
+      }
+    }
+    if (entities.length) {
+      return entities;
+    } else {
+      return null;
+    }
+  };
+
+  _extractDirtyTree = function(data, context, options) {
+    context.isList = value instanceof _EntityList;
+    if (context.isList) {
+      return _processEntityList(data, context, options);
+    } else {
+      return _processEntity(data, context, options);
+    }
+  };
+
+  cola.util.update = function(url, data, options) {
+    var context;
+    if (options == null) {
+      options = {};
+    }
+    if (data && (data instanceof _Entity || data instanceof _EntityList)) {
+      context = {};
+      data = cola.util.dirtyTree(data, options, context);
+    }
+    return $.ajax({
+      url: url,
+      type: options.method || "post",
+      contentType: options.contentType || "application/json",
+      data: JSON.stringify(data)({
+        options: options
+      })
+    }).then(function(responseData) {
+      var entity, l, len1, p, ref, ref1, syncInfo, v;
+      if (context) {
+        ref = responseData.syncInfos;
+        for (l = 0, len1 = ref.length; l < len1; l++) {
+          syncInfo = ref[l];
+          entity = context.entityMap[syncInfo.entityId];
+          if (syncInfo.data) {
+            ref1 = syncInfo.data;
+            for (p in ref1) {
+              v = ref1[p];
+              entity._set(p, v, true);
+            }
+          }
+          entity.setState(syncInfo.state);
+        }
+      }
+      return responseData.result;
+    });
   };
 
   defaultActionTimestamp = 0;
@@ -8390,7 +8231,16 @@
       }
       jQuery.ajax(options).done((function(_this) {
         return function(result) {
+          var arg;
           result = ajaxService.translateResult(result, options);
+          if (ajaxService.getListeners("response")) {
+            arg = {
+              options: options,
+              result: result
+            };
+            ajaxService.fire("response", ajaxService, arg);
+            result = arg.result;
+          }
           _this.invokeCallback(true, result);
           if (ajaxService.getListeners("success")) {
             ajaxService.fire("success", ajaxService, {
@@ -8484,6 +8334,7 @@
 
     AjaxService.events = {
       beforeSend: null,
+      response: null,
       complete: null,
       success: null,
       error: null
@@ -9853,7 +9704,6 @@
       this.expression = expression1;
       if (this.expression) {
         this.isStatic = this.expression.isStatic;
-        this.isDyna = this.expression.isDyna;
         this.paths = this.expression.paths || [];
         if (!this.paths.length && this.expression.hasCallStatement) {
           this.paths = ["**"];
@@ -9865,8 +9715,8 @@
       }
     }
 
-    _ExpressionFeature.prototype.evaluate = function(domBinding, dynaExpressionOnly, dataCtx, loadMode) {
-      var l, len1, len2, o, path, paths, ref, result, scope;
+    _ExpressionFeature.prototype.evaluate = function(domBinding, dataCtx, loadMode) {
+      var scope;
       if (dataCtx == null) {
         dataCtx = {};
       }
@@ -9878,44 +9728,10 @@
         dataCtx.vars = {};
       }
       dataCtx.vars.$dom = domBinding.dom;
-      if (dynaExpressionOnly && this.dynaExpression) {
-        result = this.dynaExpression.evaluate(scope, loadMode, dataCtx);
-      } else {
-        result = this.expression.evaluate(scope, loadMode, dataCtx);
-        if (this.isDyna && dataCtx.dynaExpression) {
-          this.dynaExpression = dataCtx.dynaExpression;
-          if (this.dynaExpression.raw !== this.dynaExpressionStr) {
-            this.dynaExpressionStr = this.dynaExpression.raw;
-          }
-          if (!this.ignoreBind) {
-            if (this.dynaPaths) {
-              ref = this.dynaPaths;
-              for (l = 0, len1 = ref.length; l < len1; l++) {
-                path = ref[l];
-                domBinding.unbind(path, this);
-              }
-            }
-            paths = this.dynaExpression.paths;
-            if (paths) {
-              for (o = 0, len2 = paths.length; o < len2; o++) {
-                path = paths[o];
-                if (this.paths.indexOf(path) < 0) {
-                  if (!this.dynaPaths) {
-                    this.dynaPaths = [path];
-                  } else {
-                    this.dynaPaths.push(path);
-                  }
-                  domBinding.bind(path, this);
-                }
-              }
-            }
-          }
-        }
-      }
-      return result;
+      return this.expression.evaluate(scope, loadMode, dataCtx);
     };
 
-    _ExpressionFeature.prototype.refresh = function(domBinding, force, dynaExpressionOnly, dataCtx) {
+    _ExpressionFeature.prototype.refresh = function(domBinding, force, dataCtx) {
       if (dataCtx == null) {
         dataCtx = {};
       }
@@ -9925,14 +9741,14 @@
       if (this.delay && !force) {
         cola.util.delay(domBinding, "refresh", 100, (function(_this) {
           return function() {
-            _this._refresh(domBinding, dynaExpressionOnly, dataCtx);
+            _this._refresh(domBinding, dataCtx);
             if (_this.isStatic && !dataCtx.unloaded) {
               _this.disabled = true;
             }
           };
         })(this));
       } else {
-        this._refresh(domBinding, dynaExpressionOnly, dataCtx);
+        this._refresh(domBinding, dataCtx);
         if (this.isStatic && !dataCtx.unloaded) {
           this.disabled = true;
         }
@@ -9958,9 +9774,9 @@
       domBinding.subScopeCreated = true;
     };
 
-    _AliasFeature.prototype._refresh = function(domBinding, dynaExpressionOnly, dataCtx) {
+    _AliasFeature.prototype._refresh = function(domBinding, dataCtx) {
       var data;
-      data = this.evaluate(domBinding, dynaExpressionOnly, dataCtx);
+      data = this.evaluate(domBinding, dataCtx);
       domBinding.scope.data.setTargetData(data);
     };
 
@@ -9980,7 +9796,7 @@
 
     _RepeatFeature.prototype.init = function(domBinding) {
       var scope;
-      domBinding.scope = scope = new cola.ItemsScope(domBinding.scope, this.isDyna ? null : this.expression);
+      domBinding.scope = scope = new cola.ItemsScope(domBinding.scope, this.expression);
       scope.onItemsRefresh = (function(_this) {
         return function() {
           _this.onItemsRefresh(domBinding);
@@ -10089,11 +9905,7 @@
       domBinding.subScopeCreated = true;
     };
 
-    _RepeatFeature.prototype._refresh = function(domBinding, dynaExpressionOnly, dataCtx) {
-      if (this.isDyna && !dynaExpressionOnly) {
-        this.evaluate(domBinding, dynaExpressionOnly, dataCtx);
-        domBinding.scope.setExpression(this.dynaExpression);
-      }
+    _RepeatFeature.prototype._refresh = function(domBinding, dataCtx) {
       domBinding.scope.retrieveData();
       domBinding.scope.refreshItems();
     };
@@ -10263,10 +10075,7 @@
     }
 
     _WatchFeature.prototype.processMessage = function(domBinding, bindingPath) {
-      var ref;
-      if (!this.isDyna || ((ref = this.dynaPaths) != null ? ref.indexOf(bindingPath) : void 0) >= 0) {
-        this.refresh(domBinding);
-      }
+      this.refresh(domBinding);
     };
 
     _WatchFeature.prototype.refresh = function(domBinding) {
@@ -10299,7 +10108,7 @@
           oldScope = cola.currentScope;
           cola.currentScope = domBinding.scope;
           try {
-            return _this.evaluate(domBinding, false, {
+            return _this.evaluate(domBinding, {
               vars: {
                 $event: evt
               }
@@ -10327,7 +10136,7 @@
       if (!((ref = this.expression) != null ? ref.writeable : void 0)) {
         return;
       }
-      paths = this.isDyna ? this.dynaPaths : this.paths;
+      paths = this.paths;
       if (paths && paths.length === 1) {
         this.ignoreMessage = true;
         domBinding.scope.set(paths[0], value);
@@ -10336,17 +10145,16 @@
     };
 
     _DomFeature.prototype.processMessage = function(domBinding, bindingPath, path, type, arg) {
-      var ref;
       if ((cola.constants.MESSAGE_REFRESH <= type && type <= cola.constants.MESSAGE_CURRENT_CHANGE) || this.watchingMoreMessage) {
-        this.refresh(domBinding, false, ((ref = this.dynaPaths) != null ? ref.indexOf(bindingPath) : void 0) >= 0);
+        this.refresh(domBinding, false);
       }
     };
 
-    _DomFeature.prototype._refresh = function(domBinding, dynaExpressionOnly, dataCtx) {
+    _DomFeature.prototype._refresh = function(domBinding, dataCtx) {
       if (this.ignoreMessage) {
         return;
       }
-      value = this.evaluate(domBinding, dynaExpressionOnly, dataCtx);
+      value = this.evaluate(domBinding, dataCtx);
       this._doRender(domBinding, value);
     };
 
@@ -10644,12 +10452,12 @@
     };
 
     _DomBinding.prototype.removeFeature = function(feature) {
-      var _features, i;
-      _features = this.features;
-      if (_features) {
-        i = _features.indexOf(feature);
+      var features, i;
+      features = this.features;
+      if (features) {
+        i = features.indexOf(feature);
         if (i > -1) {
-          _features.splice(i, 1);
+          features.splice(i, 1);
         }
         if (!feature.ignoreBind) {
           this.unbindFeature(feature);
@@ -11229,6 +11037,16 @@
         defaultPath = scope.data.alias;
       }
     }
+    if (initializers) {
+      if (context.inRepeatTemplate || bindingType === "repeat") {
+        cola.util.userData(dom, cola.constants.DOM_INITIALIZER_KEY, initializers);
+      } else {
+        for (y = 0, len6 = initializers.length; y < len6; y++) {
+          initializer = initializers[y];
+          initializer(scope, dom);
+        }
+      }
+    }
     if (!cola.util.userData(dom, cola.constants.DOM_SKIP_CHILDREN)) {
       childContext = {};
       for (k in context) {
@@ -11246,16 +11064,6 @@
       }
     } else {
       cola.util.removeUserData(dom, cola.constants.DOM_SKIP_CHILDREN);
-    }
-    if (initializers) {
-      if (context.inRepeatTemplate || bindingType === "repeat") {
-        cola.util.userData(dom, cola.constants.DOM_INITIALIZER_KEY, initializers);
-      } else {
-        for (y = 0, len6 = initializers.length; y < len6; y++) {
-          initializer = initializers[y];
-          initializer(scope, dom);
-        }
-      }
     }
     if (features != null ? features.length : void 0) {
       if (!context.inRepeatTemplate) {
@@ -11884,7 +11692,7 @@
           for (p in config) {
             v = config[p];
             importName = null;
-            if (p.charCodeAt(0) === 35) {
+            if (p.charCodeAt(0) === 64) {
               importName = p.substring(1);
             } else if (p === "$type" && typeof v === "string" && v.charCodeAt(0) === 35) {
               importName = v.substring(1);
@@ -12178,7 +11986,7 @@
         return function(self, arg) {
           var attr;
           attr = arg.attribute;
-          _this._widgetModel.data.onDataMessage(["@" + attr], cola.constants.MESSAGE_PROPERTY_CHANGE, {});
+          _this._widgetModel.data.onDataMessage([attr], cola.constants.MESSAGE_PROPERTY_CHANGE, {});
           value = _this._get(attr);
           if (value && (value instanceof cola.Entity || value instanceof cola.EntityList)) {
             _this._entityProps[attr] = value;
@@ -12667,6 +12475,11 @@
       },
       width: {
         refreshDom: true
+      },
+      focusable: {
+        type: "boolean",
+        refreshDom: true,
+        defaultValue: false
       }
     };
 
@@ -12773,7 +12586,7 @@
             popupOptions.html = cola.xRender(popupOptions.html);
           }
         }
-        return $(dom).popup(popupOptions);
+        return $fly(dom).popup(popupOptions);
       }
     };
 
@@ -13021,50 +12834,119 @@
       WidgetDataModel.__super__.constructor.call(this, model);
     }
 
+    WidgetDataModel.prototype._getRealPath = function(dynaPath) {
+      var index, realPath;
+      index = dynaPath.indexOf(".");
+      if (index > 1) {
+        realPath = this._transferDynaProperty(dynaPath.substring(1, index)) + dynaPath.substring(index);
+      } else {
+        realPath = this._transferDynaProperty(dynaPath.substring(1));
+      }
+      return realPath;
+    };
+
     WidgetDataModel.prototype.get = function(path, loadMode, context) {
       var ref;
       if (path.charCodeAt(0) === 64) {
-        return this.widget.get(path.substring(1));
+        return (ref = this.model.parent) != null ? ref.data.get(this._getRealPath(path), loadMode, context) : void 0;
       } else {
-        return (ref = this.model.parent) != null ? ref.data.get(path, loadMode, context) : void 0;
+        return this.widget.get(path);
       }
     };
 
     WidgetDataModel.prototype.set = function(path, value) {
       var ref;
       if (path.charCodeAt(0) === 64) {
-        this.widget.set(path.substring(1), value);
-        this.onDataMessage(path.split("."), cola.constants.MESSAGE_PROPERTY_CHANGE, {});
-      } else {
         if ((ref = this.model.parent) != null) {
-          ref.data.set(path, value);
+          ref.data.set(this._getRealPath(path), value);
         }
+      } else {
+        this.widget.set(path, value);
+        this.onDataMessage(path.split("."), cola.constants.MESSAGE_PROPERTY_CHANGE, {});
       }
     };
 
+    WidgetDataModel.prototype._bind = function(path, processor) {
+      var property;
+      if (path[0].charCodeAt(0) === 64) {
+        property = path[0].substring(1);
+        if (!this.dynaPropertyMap) {
+          this.dynaPropertyMap = {};
+          this.dynaPropertyPathMap = {};
+        }
+        if (this.dynaPropertyMap[property]) {
+          this.dynaPropertyMap[property] = this.dynaPropertyMap[property] + 1;
+        } else {
+          this.dynaPropertyMap[property] = 1;
+        }
+      }
+      return WidgetDataModel.__super__._bind.call(this, path, processor);
+    };
+
+    WidgetDataModel.prototype._unbind = function(path, processor) {
+      var property;
+      if (this.dynaPropertyMap && path[0].charCodeAt(0) === 64) {
+        property = path[0].substring(1);
+        if (this.dynaPropertyMap[property] > 1) {
+          this.dynaPropertyMap[property] = this.dynaPropertyMap[property] - 1;
+        } else {
+          delete this.dynaPropertyMap[property];
+          delete this.dynaPropertyPathMap[property];
+        }
+      }
+      return WidgetDataModel.__super__._unbind.call(this, path, processor);
+    };
+
+    WidgetDataModel.prototype._transferDynaProperty = function(property) {
+      var oldPath, path;
+      oldPath = this.dynaPropertyPathMap[property];
+      path = this.widget.get(property);
+      if (path !== (oldPath != null ? oldPath.join(".") : void 0)) {
+        if (oldPath) {
+          this.model.unwatchPath(oldPath);
+        }
+        this.dynaPropertyPathMap[property] = path ? path.split(".") : null;
+        if (path) {
+          this.model.watchPath(path);
+        }
+      }
+      return path;
+    };
+
     WidgetDataModel.prototype.processMessage = function(bindingPath, path, type, arg) {
-      var attr, e, entity, isParent, ref, relativePath, targetPath;
-      this.onDataMessage(path, type, arg);
-      entity = arg.entity || arg.entityList;
-      if (entity) {
-        ref = this.widget._entityProps;
-        for (attr in ref) {
-          value = ref[attr];
-          isParent = false;
-          e = entity;
-          while (e) {
-            if (e === value) {
-              isParent = true;
-              break;
+      var dynaPath, isParentPath, property, ref, relativePath;
+      isParentPath = function(targetPath, parentPath) {
+        var i, isParent, l, len1, part, targetPart;
+        isParent = true;
+        for (i = l = 0, len1 = parentPath.length; l < len1; i = ++l) {
+          part = parentPath[i];
+          targetPart = targetPath[i];
+          if (part !== targetPart) {
+            if (targetPart === "**") {
+              continue;
+            } else if (targetPart === "*") {
+              if (i === parentPath.length - 1) {
+                continue;
+              }
             }
-            e = e.parent;
+            isParent = false;
+            break;
           }
-          if (isParent) {
-            targetPath = value.getPath();
-            if (targetPath != null ? targetPath.length : void 0) {
-              relativePath = path.slice(targetPath.length);
-              this.onDataMessage(["@" + attr].concat(relativePath), type, arg);
+        }
+        return isParent;
+      };
+      if (this.dynaPropertyPathMap) {
+        ref = this.dynaPropertyPathMap;
+        for (property in ref) {
+          dynaPath = ref[property];
+          if (isParentPath(dynaPath, path)) {
+            if (type === cola.constants.MESSAGE_REFRESH || type === cola.constants.MESSAGE_CURRENT_CHANGE || type === cola.constants.MESSAGE_PROPERTY_CHANGE || type === cola.constants.MESSAGE_REMOVE) {
+              this._transferDynaProperty(property);
+              this.onDataMessage(["@" + property], cola.constants.MESSAGE_REFRESH, arg);
             }
+          } else if (isParentPath(path, dynaPath)) {
+            relativePath = path.slice(dynaPath.length);
+            this.onDataMessage(["@" + property].concat(relativePath), type, arg);
           }
         }
       }
@@ -13073,26 +12955,26 @@
     WidgetDataModel.prototype.getDataType = function(path) {
       var ref;
       if (path.charCodeAt(0) === 64) {
-        return null;
+        return (ref = this.model.parent) != null ? ref.data.getDataType(path.substring(1)) : void 0;
       } else {
-        return (ref = this.model.parent) != null ? ref.data.getDataType(path) : void 0;
+        return null;
       }
     };
 
     WidgetDataModel.prototype.getProperty = function(path) {
       var ref;
       if (path.charCodeAt(0) === 64) {
-        return null;
+        return (ref = this.model.parent) != null ? ref.data.getProperty(path.substring(1)) : void 0;
       } else {
-        return (ref = this.model.parent) != null ? ref.data.getDataType(path) : void 0;
+        return null;
       }
     };
 
     WidgetDataModel.prototype.flush = function(name, loadMode) {
       var ref;
-      if (path.charCodeAt(0) !== 64) {
+      if (path.charCodeAt(0) === 64) {
         if ((ref = this.model.parent) != null) {
-          ref.data.getDataType(name, loadMode);
+          ref.data.getDataType(name.substring(1), loadMode);
         }
       }
       return this;
@@ -13105,15 +12987,14 @@
   cola.WidgetModel = (function(superClass) {
     extend(WidgetModel, superClass);
 
+    WidgetModel.prototype.repeatNotification = true;
+
     function WidgetModel(widget1, parent1) {
-      var ref, widget;
+      var widget;
       this.widget = widget1;
       this.parent = parent1;
       widget = this.widget;
       this.data = new cola.WidgetDataModel(this, widget);
-      if ((ref = this.parent) != null) {
-        ref.data.bind("**", this);
-      }
       this.action = function(name) {
         var method;
         method = widget[name];
@@ -13125,8 +13006,6 @@
         return widget._scope.action(name);
       };
     }
-
-    WidgetModel.prototype.repeatNotification = true;
 
     WidgetModel.prototype.processMessage = function(bindingPath, path, type, arg) {
       if (this.messageTimestamp >= arg.timestamp) {
@@ -13152,7 +13031,7 @@
 
 }).call(this);
 
-/*! Cola UI - 0.9.8
+/*! Cola UI - 1.0.6
  * Copyright (c) 2002-2016 BSTEK Corp. All rights reserved.
  *
  * This file is dual-licensed under the AGPLv3 (http://www.gnu.org/licenses/agpl-3.0.html)
@@ -13167,7 +13046,7 @@ Template
  */
 
 (function() {
-  var BLANK_PATH, DEFAULT_DATE_DISPLAY_FORMAT, DEFAULT_DATE_INPUT_FORMAT, DEFAULT_DATE_TIME_DISPLAY_FORMAT, DEFAULT_TIME_DISPLAY_FORMAT, DEFAULT_TIME_INPUT_FORMAT, DropBox, LIST_SIZE_PREFIXS, SAFE_PULL_EFFECT, SAFE_SLIDE_EFFECT, SLIDE_ANIMATION_SPEED, TEMP_TEMPLATE, TipManager, _columnsSetter, _createGroupArray, _getEntityId, _pageCodeMap, _pagesItems, _removeTranslateStyle, containerEmptyChildren, currentDate, currentHours, currentMinutes, currentMonth, currentSeconds, currentYear, dateTimeSlotConfigs, dateTypeConfig, dropdownDialogMargin, emptyRadioGroupItems, isIE11, now, oldErrorTemplate, renderTabs, slotAttributeGetter, slotAttributeSetter,
+  var BLANK_PATH, DEFAULT_DATE_DISPLAY_FORMAT, DEFAULT_DATE_INPUT_FORMAT, DEFAULT_DATE_TIME_DISPLAY_FORMAT, DEFAULT_TIME_DISPLAY_FORMAT, DEFAULT_TIME_INPUT_FORMAT, DropBox, LIST_SIZE_PREFIXS, SAFE_PULL_EFFECT, SAFE_SLIDE_EFFECT, SLIDE_ANIMATION_SPEED, TEMP_TEMPLATE, TipManager, _columnsSetter, _createGroupArray, _getEntityId, _pageCodeMap, _pagesItems, _removeTranslateStyle, containerEmptyChildren, currentDate, currentHours, currentMinutes, currentMonth, currentSeconds, currentYear, dateTimeSlotConfigs, dateTypeConfig, dropdownDialogMargin, emptyRadioGroupItems, isIE11, now, renderTabs, slotAttributeGetter, slotAttributeSetter,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -13188,12 +13067,12 @@ Template
       if (!this._dom) {
         return;
       }
-      child = this._dom.firstChild;
+      child = this._dom.firstElementChild;
       while (child) {
         if (child.nodeName === "TEMPLATE") {
           this.regTemplate(child);
         }
-        child = child.nextSibling;
+        child = child.nextElementSibling;
       }
       this._regDefaultTempaltes();
     },
@@ -13235,8 +13114,59 @@ Template
         this.regTemplate(name, template);
       }
     },
+    trimTemplate: function(template) {
+      var c, child, html, k, ref, templs, widgetConfigs;
+      if (template.nodeType) {
+        if (template.nodeName === "TEMPLATE") {
+          if (!template.firstChild) {
+            html = template.innerHTML;
+            if (html) {
+              if (TEMP_TEMPLATE == null) {
+                TEMP_TEMPLATE = document.createElement("div");
+              }
+              template = TEMP_TEMPLATE;
+              template.innerHTML = html;
+            }
+          }
+          this._trimTemplate(template);
+          if (template.firstChild === template.lastChild) {
+            template = template.firstChild;
+          } else {
+            templs = [];
+            child = template.firstChild;
+            while (child) {
+              templs.push(child);
+              child = child.nextSibling;
+            }
+            template = templs;
+          }
+        }
+      } else {
+        if (this._doms == null) {
+          this._doms = {};
+        }
+        template = $.xCreate(template, this._doms);
+        if (this._doms.widgetConfigs) {
+          if (this._templateContext == null) {
+            this._templateContext = {};
+          }
+          if (this._templateContext.widgetConfigs) {
+            widgetConfigs = this._templateContext.widgetConfigs;
+            ref = this._doms.widgetConfigs;
+            for (k in ref) {
+              c = ref[k];
+              widgetConfigs[k] = c;
+            }
+          } else {
+            this._templateContext.widgetConfigs = this._doms.widgetConfigs;
+          }
+        }
+      }
+      template._trimed = true;
+      return template;
+    },
     getTemplate: function(name, defaultName) {
-      var c, child, html, k, ref, template, templs, widgetConfigs;
+      var template;
       if (name == null) {
         name = "default";
       }
@@ -13252,55 +13182,7 @@ Template
         template = cola.util.getGlobalTemplate(name);
       }
       if (template && !template._trimed) {
-        if (template.nodeType) {
-          if (template.nodeName === "TEMPLATE") {
-            if (!template.firstChild) {
-              html = template.innerHTML;
-              if (html) {
-                if (TEMP_TEMPLATE == null) {
-                  TEMP_TEMPLATE = document.createElement("div");
-                }
-                template = TEMP_TEMPLATE;
-                template.innerHTML = html;
-              }
-            }
-            this._trimTemplate(template);
-            if (template.firstChild === template.lastChild) {
-              template = template.firstChild;
-            } else {
-              templs = [];
-              child = template.firstChild;
-              while (child) {
-                templs.push(child);
-                child = child.nextSibling;
-              }
-              template = templs;
-            }
-          }
-          this._templates[name] = template;
-        } else {
-          if (this._doms == null) {
-            this._doms = {};
-          }
-          template = $.xCreate(template, this._doms);
-          if (this._doms.widgetConfigs) {
-            if (this._templateContext == null) {
-              this._templateContext = {};
-            }
-            if (this._templateContext.widgetConfigs) {
-              widgetConfigs = this._templateContext.widgetConfigs;
-              ref = this._doms.widgetConfigs;
-              for (k in ref) {
-                c = ref[k];
-                widgetConfigs[k] = c;
-              }
-            } else {
-              this._templateContext.widgetConfigs = this._doms.widgetConfigs;
-            }
-          }
-          this._templates[name] = template;
-        }
-        template._trimed = true;
+        template = this.trimTemplate(template);
       }
       return template;
     },
@@ -13326,7 +13208,7 @@ Template
   cola.DataWidgetMixin = {
     _dataWidget: true,
     _bindSetter: function(bindStr) {
-      var bindInfo, bindProcessor, expression, i, len1, len2, n, o, p, path, paths, ref, watchingPaths;
+      var bindInfo, expression, i, len1, len2, n, o, p, path, paths, ref, watchingPaths;
       if (this._bind === bindStr) {
         return;
       }
@@ -13360,7 +13242,7 @@ Template
           }
         }
         if (!this._bindProcessor) {
-          this._bindProcessor = bindProcessor = {
+          this._bindProcessor = {
             processMessage: (function(_this) {
               return function(bindingPath, path, type, arg) {
                 if (_this._filterDataMessage) {
@@ -13397,7 +13279,7 @@ Template
           this._watchingPaths = watchingPaths = [];
           for (i = o = 0, len2 = paths.length; o < len2; i = ++o) {
             p = paths[i];
-            this._scope.data.bind(p, bindProcessor);
+            this._scope.data.bind(p, this._bindProcessor);
             watchingPaths[i] = p.split(".");
           }
           if (this._processDataMessage) {
@@ -14181,7 +14063,7 @@ Template
       return ButtonGroup.__super__.constructor.apply(this, arguments);
     }
 
-    ButtonGroup.tagName = "c-buttonGroup";
+    ButtonGroup.tagName = "c-button-group";
 
     ButtonGroup.SEMANTIC_CLASS = ["left floated", "right floated", "top attached", "bottom attached", "left attached", "right attached"];
 
@@ -16387,12 +16269,7 @@ Template
       path: {
         defaultValue: BLANK_PATH,
         setter: function(value) {
-          var oldValue;
-          oldValue = this._path;
           this._path = value;
-          if (oldValue === value || !this._dom) {
-            return;
-          }
           this._loaded = false;
           this._replaceUrl(this._path);
         }
@@ -16476,14 +16353,14 @@ Template
 
     IFrame.prototype._replaceUrl = function(url) {
       var contentWindow;
-      if (this._doms) {
+      if (this._doms && this._doms.dimmer) {
         $fly(this._doms.dimmer).addClass("active");
       }
       contentWindow = this.getContentWindow();
       if (contentWindow) {
         contentWindow.location.replace(url);
       } else {
-        $fly(this._doms.iframe).prop("src", url);
+        this._doms.iframe && $fly(this._doms.iframe).prop("src", url);
       }
       return this;
     };
@@ -17737,6 +17614,142 @@ Template
   })(cola.Widget);
 
   cola.registerWidget(cola.Reveal);
+
+
+  /*
+      按钮的抽象类
+   */
+
+  cola.ToolbarButton = (function(superClass) {
+    extend(ToolbarButton, superClass);
+
+    function ToolbarButton() {
+      return ToolbarButton.__super__.constructor.apply(this, arguments);
+    }
+
+    ToolbarButton.tagName = "c-toolbar-button";
+
+    ToolbarButton.CLASS_NAME = "toolbar-button";
+
+    ToolbarButton.attributes = {
+      caption: {
+        refreshDom: true
+      },
+      icon: {
+        refreshDom: true,
+        setter: function(value) {
+          var oldValue, ref;
+          oldValue = this._icon;
+          this._icon = value;
+          if (oldValue && oldValue !== value && this._dom && ((ref = this._doms) != null ? ref.iconDom : void 0)) {
+            $fly(this._doms.iconDom).removeClass(oldValue);
+          }
+        }
+      },
+      iconPosition: {
+        refreshDom: true,
+        defaultValue: "left",
+        "enum": ["left", "right"]
+      },
+      focusable: {
+        type: "boolean",
+        refreshDom: true,
+        defaultValue: false
+      },
+      disabled: {
+        type: "boolean",
+        refreshDom: true,
+        defaultValue: false
+      }
+    };
+
+    ToolbarButton.prototype._initDom = function(dom) {
+      this._doms = {};
+      return $(dom).append($.xCreate({
+        tagName: "div",
+        contextKey: "innerDom",
+        "class": "ui button"
+      }, this._doms));
+    };
+
+    ToolbarButton.prototype._refreshIcon = function() {
+      var $innerDom, caption, icon, iconDom, iconPosition, pos;
+      if (!this._dom) {
+        return;
+      }
+      icon = this.get("icon");
+      iconPosition = this.get("iconPosition");
+      caption = this.get("caption");
+      $innerDom = $(this._doms.innerDom);
+      iconDom = $innerDom.find(">i");
+      if (this._icon) {
+        if (!iconDom.length) {
+          iconDom = $.xCreate({
+            tagName: "i",
+            "class": "icon"
+          });
+        }
+        pos = iconPosition === "right" ? "append" : "prepend";
+        $innerDom[pos](iconDom);
+        $(iconDom).addClass(icon);
+      } else {
+        $(iconDom).remove();
+      }
+    };
+
+    ToolbarButton.prototype._doRefreshDom = function() {
+      var $innerDom, caption, captionDom, classNamePool;
+      if (!this._dom) {
+        return;
+      }
+      ToolbarButton.__super__._doRefreshDom.call(this);
+      $innerDom = $(this._doms.innerDom);
+      classNamePool = this._classNamePool;
+      caption = this._caption;
+      captionDom = $innerDom.find(".caption");
+      if (caption) {
+        if (!captionDom.length) {
+          captionDom = $.xCreate({
+            tagName: "span",
+            "class": "caption"
+          });
+          $innerDom.append(captionDom);
+        }
+        $(captionDom).text(caption);
+      } else {
+        $(captionDom).empty();
+      }
+      if (this.get("focusable")) {
+        $innerDom.attr("tabindex", "0");
+      } else {
+        $innerDom.removeAttr("tabindex");
+      }
+      this._refreshIcon();
+      $innerDom.toggleClass("disabled", this._disabled);
+    };
+
+    return ToolbarButton;
+
+  })(cola.Widget);
+
+  cola.Toolbar = (function(superClass) {
+    extend(Toolbar, superClass);
+
+    function Toolbar() {
+      return Toolbar.__super__.constructor.apply(this, arguments);
+    }
+
+    Toolbar.tagName = "c-toolbar";
+
+    Toolbar.CLASS_NAME = "ui toolbar";
+
+    return Toolbar;
+
+  })(cola.Widget);
+
+  cola.registerWidget(cola.ToolbarButton);
+
+  cola.registerWidget(cola.Toolbar);
 
   cola.Segment = (function(superClass) {
     extend(Segment, superClass);
@@ -19841,6 +19854,220 @@ Template
     }
   };
 
+  cola.SplitPane = (function(superClass) {
+    extend(SplitPane, superClass);
+
+    function SplitPane() {
+      return SplitPane.__super__.constructor.apply(this, arguments);
+    }
+
+    SplitPane.tagName = "c-split-pane";
+
+    SplitPane.CLASS_NAME = "ui split-pane";
+
+    SplitPane.attributes = {
+      direction: {
+        refreshDom: true,
+        "enum": ["left", "right", "top", "bottom"],
+        defaultValue: "top"
+      },
+      position: {
+        defaultValue: 100
+      }
+    };
+
+    SplitPane.prototype._doRefreshDom = function() {
+      if (!this._dom) {
+        return;
+      }
+      SplitPane.__super__._doRefreshDom.call(this);
+      this._setPosition(this._position);
+    };
+
+    SplitPane.prototype._setPosition = function(position) {
+      var $mainDom, $sideDom, $splitterDom, direction, mainPos;
+      direction = this._direction;
+      $sideDom = $(this._doms.sideDom);
+      $mainDom = $(this._doms.mainDom);
+      $splitterDom = $(this._doms.splitter);
+      if (isFinite(position)) {
+        mainPos = position + 4;
+      } else {
+        mainPos = "calc(" + position + " + 4px)";
+      }
+      switch (direction) {
+        case "left":
+          $sideDom.css({
+            width: position
+          });
+          $splitterDom.css({
+            left: position
+          });
+          return $mainDom.css({
+            left: mainPos
+          });
+        case "right":
+          $sideDom.css({
+            width: position
+          });
+          $splitterDom.css({
+            right: position
+          });
+          return $mainDom.css({
+            right: mainPos
+          });
+        case "top":
+          $sideDom.css({
+            height: position
+          });
+          $splitterDom.css({
+            top: position
+          });
+          return $mainDom.css({
+            top: mainPos
+          });
+        case "bottom":
+          $sideDom.css({
+            height: position
+          });
+          $splitterDom.css({
+            bottom: position
+          });
+          return $mainDom.css({
+            bottom: mainPos
+          });
+      }
+    };
+
+    SplitPane.prototype._initDom = function(dom) {
+      var $dom, createMouseMove, doms, fixedHorizontalHandler, fixedVerticalHandler, minHeight, minSize, minWidth, pagePos, pageXof, pageYof, splitPane;
+      SplitPane.__super__._initDom.call(this, dom);
+      $dom = $(dom);
+      doms = this._doms;
+      if (!doms.splitter) {
+        doms.splitter = $.xCreate({
+          tagName: "div",
+          "class": "splitter"
+        });
+        $($dom.find(">.pane")[1]).before(doms.splitter);
+      }
+      $dom.addClass("fixed-" + this._direction);
+      $(doms.sideDom).addClass("side-pane");
+      $(doms.mainDom).addClass("main-pane");
+      pagePos = function(event, pos) {
+        var attrName;
+        attrName = "page" + pos;
+        if (event[attrName] !== void 0) {
+          return event[attrName];
+        } else if (event.originalEvent[attrName] !== void 0) {
+          return event.originalEvent[attrName];
+        } else if (event.originalEvent.touches) {
+          return event.originalEvent.touches[0][attrName];
+        }
+      };
+      pageXof = function(event) {
+        return pagePos(event, "X");
+      };
+      pageYof = function(event) {
+        return pagePos(event, "Y");
+      };
+      splitPane = this;
+      minSize = function(element, name) {
+        return parseInt($(element).css('min-' + name), 10) || 0;
+      };
+      minWidth = function(element) {
+        return minSize(element, "width");
+      };
+      minHeight = function(element) {
+        return minSize(element, "height");
+      };
+      fixedVerticalHandler = function(pageX) {
+        var leftOffset, sideMaxWidth, sideMinWidth;
+        sideMinWidth = minWidth(doms.sideDom);
+        sideMaxWidth = dom.offsetWidth - minWidth(doms.mainDom) - doms.splitter.offsetWidth;
+        leftOffset = doms.splitter.offsetLeft - pageX;
+        return function(event) {
+          var left;
+          if (typeof event.preventDefault === "function") {
+            event.preventDefault();
+          }
+          left = Math.min(Math.max(sideMinWidth, leftOffset + pageXof(event)), sideMaxWidth);
+          return splitPane._setPosition(left);
+        };
+      };
+      fixedHorizontalHandler = function(pageY) {
+        var sideMaxHeight, sideMinHeight, topOffset;
+        sideMinHeight = minHeight(doms.sideDom);
+        sideMaxHeight = dom.offsetHeight - minHeight(doms.mainDom) - doms.splitter.offsetHeight;
+        topOffset = doms.splitter.offsetTop - pageY;
+        return function(event) {
+          var top;
+          if (typeof event.preventDefault === "function") {
+            event.preventDefault();
+          }
+          top = Math.min(Math.max(sideMinHeight, topOffset + pageYof(event)), sideMaxHeight);
+          return splitPane._setPosition(top);
+        };
+      };
+      createMouseMove = function($splitPane, pageX, pageY) {
+        var direction;
+        direction = splitPane._direction;
+        if (direction === "left" || direction === "right") {
+          return fixedVerticalHandler(pageX);
+        } else {
+          return fixedHorizontalHandler(pageY);
+        }
+      };
+      $(doms.splitter).on('mousedown', function() {
+        var $splitPane, $splitter, moveEventHandler;
+        event.preventDefault();
+        $splitter = $(this);
+        $splitPane = $splitter.parent();
+        $splitter.addClass('dragged');
+        moveEventHandler = createMouseMove($splitPane, pageXof(event), pageYof(event));
+        $(document).on('mousemove', moveEventHandler);
+        return $(document).one('mouseup', function(event) {
+          $(document).off('mousemove', moveEventHandler);
+          return $splitter.removeClass('dragged touch');
+        });
+      });
+      return this;
+    };
+
+    SplitPane.prototype.destroy = function() {
+      if (this._destroyed) {
+        return;
+      }
+      return SplitPane.__super__.destroy.call(this);
+    };
+
+    SplitPane.prototype._parseDom = function(dom) {
+      var $dom, mainIndex, panes, sideIndex, splitter;
+      if (this._doms == null) {
+        this._doms = {};
+      }
+      $dom = $(dom);
+      panes = $dom.find(">.pane");
+      sideIndex = 0;
+      mainIndex = 1;
+      if (!(this._direction === "left" || this._direction === "top")) {
+        sideIndex = 1;
+        mainIndex = 0;
+      }
+      this._doms.sideDom = panes[sideIndex];
+      this._doms.mainDom = panes[mainIndex];
+      splitter = $dom.find(">.splitter");
+      if (splitter.length) {
+        this._doms.splitter = splitter[0];
+      }
+    };
+
+    return SplitPane;
+
+  })(cola.Widget);
+
+  cola.registerWidget(cola.SplitPane);
+
   cola.AbstractEditor = (function(superClass) {
     extend(AbstractEditor, superClass);
 
@@ -19874,16 +20101,10 @@ Template
             dom = this._dom;
             if (dom && oldState) {
               cola.util.removeClass(dom, oldState);
-              if (this._fieldDom) {
-                cola.util.removeClass(this._fieldDom, oldState);
-              }
             }
             this._state = state;
             if (dom && state) {
               cola.util.addClass(dom, state);
-              if (this._fieldDom) {
-                cola.util.addClass(this._fieldDom, state);
-              }
             }
           }
         }
@@ -19898,15 +20119,19 @@ Template
     };
 
     AbstractEditor.prototype._initDom = function(dom) {
-      var fieldDom;
+      var fieldDom, ref;
       if (this._state) {
         cola.util.addClass(dom, this._state);
       }
-      fieldDom = dom.parentNode;
-      if (fieldDom && !jQuery.find.matchesSelector(fieldDom, ".field")) {
-        fieldDom = null;
+      if (!this._bind) {
+        fieldDom = dom.parentNode;
+        if (fieldDom.nodeName === "FIELD") {
+          this._field = cola.widget(fieldDom);
+          if ((ref = this._field) != null ? ref._bind : void 0) {
+            this.set("bind", this._field._bind);
+          }
+        }
       }
-      this._fieldDom = fieldDom;
     };
 
     AbstractEditor.prototype._setValue = function(value) {
@@ -19950,28 +20175,17 @@ Template
     };
 
     AbstractEditor.prototype._processDataMessage = function(path, type, arg) {
-      var $formDom, entity, form, keyMessage, ref, value;
+      var entity, keyMessage, ref, value;
       if (type === cola.constants.MESSAGE_VALIDATION_STATE_CHANGE || (cola.constants.MESSAGE_REFRESH <= type && type <= cola.constants.MESSAGE_CURRENT_CHANGE)) {
         if ((ref = this._bindInfo) != null ? ref.writeable : void 0) {
           entity = this._scope.get(this._bindInfo.entityPath);
           if (entity instanceof cola.EntityList) {
             entity = entity.current;
+            entity = entity.current;
           }
           if (entity) {
             keyMessage = entity.getKeyMessage(this._bindInfo.property);
             this.set("state", keyMessage != null ? keyMessage.type : void 0);
-          }
-        }
-        if (!this._formDom) {
-          if (this._fieldDom) {
-            $formDom = $fly(this._fieldDom).closest(".ui.form");
-          }
-          this._formDom = ($formDom != null ? $formDom[0] : void 0) || null;
-        }
-        if (this._formDom) {
-          form = cola.widget(this._formDom);
-          if (form && form instanceof cola.Form) {
-            form.setFieldMessages(this, keyMessage);
           }
         }
       }
@@ -20233,26 +20447,21 @@ Template
 
     Toggle.tagName = "c-toggle";
 
-    Toggle.CLASS_NAME = "toggle checkbox";
+    Toggle.prototype._doRefreshDom = function() {
+      if (!this._dom) {
+        return;
+      }
+      Toggle.__super__._doRefreshDom.call(this);
+      if (!this.hasClass("slider")) {
+        return this._classNamePool.add("toggle");
+      }
+    };
 
     return Toggle;
 
   })(cola.AbstractCheckbox);
 
   cola.registerWidget(cola.Toggle);
-
-  cola.Slider = (function(superClass) {
-    extend(Slider, superClass);
-
-    function Slider() {
-      return Slider.__super__.constructor.apply(this, arguments);
-    }
-
-    Slider.CLASS_NAME = "slider checkbox";
-
-    return Slider;
-
-  })(cola.AbstractCheckbox);
 
   DEFAULT_DATE_DISPLAY_FORMAT = "yyyy-MM-dd";
 
@@ -20276,7 +20485,9 @@ Template
     AbstractInput.SEMANTIC_CLASS = ["left floated", "right floated", "corner labeled", "right labeled", "left icon", "left action"];
 
     AbstractInput.attributes = {
-      name: null,
+      name: {
+        readOnlyAfterCreate: true
+      },
       value: {
         setter: function(value) {
           if (this._dataType) {
@@ -21222,11 +21433,11 @@ Template
     RadioButton._modelValue = false;
 
     RadioButton.prototype._parseDom = function(dom) {
-      var child, nameAttr;
+      var $dom, child, nameAttr;
       if (this._doms == null) {
         this._doms = {};
       }
-      this._$dom = $(dom);
+      $dom = this.get$Dom();
       child = dom.firstChild;
       while (child) {
         if (child.nodeType === 1) {
@@ -21248,7 +21459,7 @@ Template
         child = child.nextSibling;
       }
       if (!this._doms.label && !this._doms.input) {
-        this._$dom.append($.xCreate([
+        $dom.append($.xCreate([
           {
             tagName: "input",
             type: this.constructor.INPUT_TYPE,
@@ -21266,7 +21477,7 @@ Template
           tagName: "label",
           content: this._label || this._value || ""
         });
-        this._$dom.append(this._doms.label);
+        $dom.append(this._doms.label);
       }
       if (!this._doms.input) {
         this._doms.input = $.xCreate({
@@ -21465,10 +21676,8 @@ Template
       ref = this._items;
       for (n = 0, len1 = ref.length; n < len1; n++) {
         item = ref[n];
-        if (item.get("value") === value) {
-          item.set("checked", true);
-          break;
-        }
+        item.set("readOnly", this._readOnly);
+        item.set("checked", item.get("value") === value);
       }
     };
 
@@ -21964,15 +22173,21 @@ Template
     };
 
     AbstractDropdown.prototype._initDom = function(dom) {
-      var dropdown, valueContent;
       AbstractDropdown.__super__._initDom.call(this, dom);
-      $fly(this._doms.input).xInsertAfter({
-        tagName: "div",
-        "class": "value-content",
-        contextKey: "valueContent"
-      }, this._doms);
+      if (this._useValueContent) {
+        $fly(this._doms.input).xInsertAfter({
+          tagName: "div",
+          "class": "value-content",
+          contextKey: "valueContent"
+        }, this._doms);
+      }
       $fly(dom).delegate(">.icon", "click", (function(_this) {
         return function() {
+          debugger;
+          if (_this._finalReadOnly && !_this._disabled && !_this._opened) {
+            _this.open();
+            return;
+          }
           if (_this._opened) {
             _this.close();
           } else {
@@ -21982,40 +22197,49 @@ Template
             _this.open();
           }
         };
-      })(this));
-      dropdown = this;
-      valueContent = this._doms.valueContent;
-      $(this._doms.input).on("focus", function() {
-        dropdown._doFocus();
-      }).on("blur", function() {
-        dropdown._doBlur();
-      }).on("keydown", (function(_this) {
-        return function(event) {
+      })(this)).on("keydown", (function(_this) {
+        return function(evt) {
           var arg;
           arg = {
-            keyCode: event.keyCode,
-            shiftKey: event.shiftKey,
-            ctrlKey: event.ctrlKey,
-            altKey: event.altKey,
-            event: event,
-            inputValue: $fly(_this._doms.input).val()
+            keyCode: evt.keyCode,
+            shiftKey: evt.shiftKey,
+            ctrlKey: evt.ctrlKey,
+            altKey: evt.altKey,
+            event: evt,
+            inputValue: _this._doms.input.value
           };
-          return _this.fire("keyDown", _this, arg);
+          _this.fire("keyDown", _this, arg);
+          if (_this._dropdownContent) {
+            $(_this._dropdownContent).trigger(evt);
+          }
         };
       })(this)).on("keypress", (function(_this) {
-        return function(event) {
+        return function(evt) {
           var arg;
           arg = {
-            keyCode: event.keyCode,
-            shiftKey: event.shiftKey,
-            ctrlKey: event.ctrlKey,
-            altKey: event.altKey,
-            event: event,
-            inputValue: $fly(_this._doms.input).val()
+            keyCode: evt.keyCode,
+            shiftKey: evt.shiftKey,
+            ctrlKey: evt.ctrlKey,
+            altKey: evt.altKey,
+            event: evt,
+            inputValue: _this._doms.input.value
           };
           if (_this.fire("keyPress", _this, arg) === false) {
 
           }
+        };
+      })(this));
+      $(this._doms.input).on("focus", (function(_this) {
+        return function() {
+          return _this._doFocus();
+        };
+      })(this)).on("blur", (function(_this) {
+        return function() {
+          return _this._doBlur();
+        };
+      })(this)).on("keypress", (function(_this) {
+        return function() {
+          return _this._inputEdited = true;
         };
       })(this));
       if (!this._skipSetIcon) {
@@ -22029,12 +22253,11 @@ Template
     };
 
     AbstractDropdown.prototype._doBlur = function() {
-      $fly(this._doms.valueContent).removeClass("placeholder");
       this.fire("blur", this, {});
     };
 
     AbstractDropdown.prototype._doFocus = function() {
-      $fly(this._doms.valueContent).addClass("placeholder");
+      this._inputEdited = false;
       this.fire("focus", this, {});
     };
 
@@ -22083,11 +22306,13 @@ Template
         input: (function(_this) {
           return function(evt) {
             var $valueContent;
-            $valueContent = $fly(_this._doms.valueContent);
-            if (evt.target.value) {
-              $valueContent.hide();
-            } else {
-              $valueContent.show();
+            if (_this._useValueContent) {
+              $valueContent = $fly(_this._doms.valueContent);
+              if (evt.target.value) {
+                $valueContent.hide();
+              } else {
+                $valueContent.show();
+              }
             }
           };
         })(this)
@@ -22106,7 +22331,7 @@ Template
       var $inputDom, ref;
       $inputDom = $fly(this._doms.input);
       $inputDom.attr("placeholder", this.get("placeholder"));
-      $inputDom.prop("readonly", this._finalReadOnly || this._isEditorReadOnly());
+      $inputDom.prop("readonly", this._finalReadOnly || this._isEditorReadOnly() || this._disabled);
       if ((ref = this.get("actionButton")) != null) {
         ref.set("disabled", this._finalReadOnly);
       }
@@ -22140,9 +22365,7 @@ Template
     };
 
     AbstractDropdown.prototype._setValueContent = function() {
-      var alias, ctx, currentItemScope, elementAttrBinding, input, item, ref, valueContent;
-      input = this._doms.input;
-      input.value = "";
+      var alias, ctx, currentItemScope, elementAttrBinding, input, item, ref, text, valueContent;
       item = this._currentItem;
       if (item == null) {
         if (!this._textProperty) {
@@ -22152,50 +22375,57 @@ Template
           item[this._textProperty] = this._value;
         }
       }
+      input = this._doms.input;
       if (item) {
+        if (this._useValueContent) {
+          elementAttrBinding = (ref = this._elementAttrBindings) != null ? ref["items"] : void 0;
+          alias = (elementAttrBinding != null ? elementAttrBinding.expression.alias : void 0) || "item";
+          currentItemScope = this._currentItemScope;
+          if (currentItemScope && currentItemScope.data.alias !== alias) {
+            currentItemScope = null;
+          }
+          if (!currentItemScope) {
+            this._currentItemScope = currentItemScope = new cola.ItemScope(this._scope, alias);
+          }
+          currentItemScope.data.setTargetData(item);
+          valueContent = this._doms.valueContent;
+          if (!valueContent._inited) {
+            valueContent._inited = true;
+            ctx = {
+              defaultPath: alias
+            };
+            this._initValueContent(valueContent, ctx);
+            cola.xRender(valueContent, currentItemScope, ctx);
+          }
+          $fly(valueContent).show();
+        }
+        if (item instanceof cola.Entity || (typeof item === "object" && !(item instanceof Date))) {
+          text = cola.Entity._evalDataPath(item, this._textProperty || this._valueProperty);
+        } else {
+          text = item;
+        }
+        input.value = text || "";
         input.placeholder = "";
-        elementAttrBinding = (ref = this._elementAttrBindings) != null ? ref["items"] : void 0;
-        alias = (elementAttrBinding != null ? elementAttrBinding.expression.alias : void 0) || "item";
-        currentItemScope = this._currentItemScope;
-        if (currentItemScope && currentItemScope.data.alias !== alias) {
-          currentItemScope = null;
-        }
-        if (!currentItemScope) {
-          this._currentItemScope = currentItemScope = new cola.ItemScope(this._scope, alias);
-        }
-        currentItemScope.data.setTargetData(item);
-        valueContent = this._doms.valueContent;
-        if (!valueContent._inited) {
-          valueContent._inited = true;
-          ctx = {
-            defaultPath: alias
-          };
-          this._initValueContent(valueContent, ctx);
-          cola.xRender(valueContent, currentItemScope, ctx);
-        }
-        $fly(valueContent).show();
+        this.get$Dom().removeClass("placeholder");
       } else {
+        input.value = "";
         input.placeholder = this._placeholder || "";
-        $fly(this._doms.valueContent).hide();
+        this.get$Dom().addClass("placeholder");
+        if (this._useValueContent) {
+          $fly(this._doms.valueContent).hide();
+        }
       }
     };
 
     AbstractDropdown.prototype._initValueContent = function(valueContent, context) {
-      var len1, n, property, t, template;
+      var property, template;
       property = this._textProperty || this._valueProperty;
       if (property) {
         context.defaultPath += "." + property;
       }
       template = this.getTemplate("value-content");
       if (template) {
-        if (template instanceof Array) {
-          for (n = 0, len1 = template.length; n < len1; n++) {
-            t = template[n];
-            valueContent.appendChild(t);
-          }
-        } else {
-          valueContent.appendChild(template);
-        }
+        valueContent.appendChild(template);
       }
     };
 
@@ -22260,6 +22490,7 @@ Template
             };
           })(this)
         };
+        this._dropdownContent = config.dom.firstChild;
         if (this._dropdownWidth) {
           config.width = this._dropdownWidth;
         }
@@ -22298,7 +22529,10 @@ Template
 
     AbstractDropdown.prototype.open = function(callback) {
       var $containerDom, $flexContent, clientHeight, container, containerHeight, doCallback, height;
-      if (this._finalReadOnly || this.fire("beforeOpen", this) === false) {
+      if (this._finalReadOnly && this._disabled) {
+        return;
+      }
+      if (this.fire("beforeOpen", this) === false) {
         return;
       }
       doCallback = (function(_this) {
@@ -22353,6 +22587,8 @@ Template
       var container;
       if (selectedData !== void 0) {
         this._selectData(selectedData);
+      } else if (this._inputEdited) {
+        this.refresh();
       }
       container = this._getContainer();
       if (container != null) {
@@ -22364,6 +22600,7 @@ Template
 
     AbstractDropdown.prototype._selectData = function(item) {
       var value;
+      this._inputEdited = false;
       if (this._valueProperty && item) {
         if (item instanceof cola.Entity) {
           value = item.get(this._valueProperty);
@@ -22524,11 +22761,21 @@ Template
       "list": {
         tagName: "div",
         contextKey: "flexContent",
-        "class": "flex-box",
         content: {
           tagName: "c-listview",
           contextKey: "list",
+          allowNoCurrent: false,
+          changeCurrentItem: false,
+          highlightCurrentItem: true,
           style: "overflow:auto"
+        },
+        keydown: function(evt) {
+          if (!this._disableKeyBubble) {
+            this._disableKeyBubble = true;
+            $fly(this).find(">c-listview").trigger(evt);
+            this._disableKeyBubble = false;
+          }
+          return true;
         }
       },
       "filterable-list": {
@@ -22540,7 +22787,7 @@ Template
             "class": "box filter-container",
             content: {
               tagName: "c-input",
-              contextKey: "filterInput",
+              contextKey: "input",
               "class": "fluid",
               icon: "search"
             }
@@ -22551,25 +22798,28 @@ Template
             style: "min-height:2em",
             content: {
               tagName: "c-listview",
-              contextKey: "list"
+              contextKey: "list",
+              allowNoCurrent: false,
+              changeCurrentItem: false,
+              highlightCurrentItem: true
             }
           }
-        ]
-      }
-    };
-
-    Dropdown.prototype._initValueContent = function(valueContent, context) {
-      var template;
-      Dropdown.__super__._initValueContent.call(this, valueContent, context);
-      if (!valueContent.firstChild) {
-        template = this.getTemplate();
-        if (template) {
-          valueContent.appendChild(this._cloneTemplate(template));
+        ],
+        keydown: function(evt) {
+          if (!this._disableKeyBubble) {
+            this._disableKeyBubble = true;
+            $fly(this).find(">.flex-box >c-listview").trigger(evt);
+            this._disableKeyBubble = false;
+          }
+          return true;
         }
       }
     };
 
     Dropdown.prototype._initDom = function(dom) {
+      if (this._filterable) {
+        $fly(dom).addClass("filterable");
+      }
       this._regDefaultTempaltes();
       return Dropdown.__super__._initDom.call(this, dom);
     };
@@ -22588,7 +22838,7 @@ Template
               return _this._onInput(inputDom.value);
             };
           })(this));
-          this._onInput(inputDom.value);
+          this._list.set("filterCriteria", null).refresh();
         }
         return true;
       }
@@ -22602,8 +22852,34 @@ Template
     };
 
     Dropdown.prototype._onInput = function(value) {
-      cola.util.delay(this, "filterItems", 300, function() {
-        this._list.set("filterCriteria", value);
+      cola.util.delay(this, "filterItems", 150, function() {
+        var criteria, currentItemDom, exactlyMatch, filterProperty, firstItem, items;
+        criteria = value;
+        filterProperty = this._filterProperty || this._textProperty;
+        if (value !== null) {
+          if (filterProperty) {
+            criteria = {};
+            criteria[filterProperty] = value;
+          }
+        }
+        this._list.set("filterCriteria", criteria).refresh();
+        items = this._list.getItems();
+        currentItemDom = null;
+        if (value !== null) {
+          exactlyMatch;
+          firstItem = items[0];
+          if (firstItem) {
+            if (filterProperty) {
+              exactlyMatch = cola.Entity._evalDataPath(firstItem, filterProperty) === value;
+            } else {
+              exactlyMatch = firstItem === value;
+            }
+          }
+          if (exactlyMatch) {
+            currentItemDom = this._list._getFirstItemDom();
+          }
+        }
+        this._list._setCurrentItemDom(currentItemDom);
       });
     };
 
@@ -22641,8 +22917,16 @@ Template
             return _this.close(list.get("currentItem"));
           };
         })(this));
-        if (this._doms.filterInput) {
-          this._filterInput = cola.widget(this._doms.filterInput);
+        list.get$Dom().on("keydown", (function(_this) {
+          return function(evt) {
+            if (evt.keyCode === 13) {
+              _this.close(list.get("currentItem") || null);
+              return false;
+            }
+          };
+        })(this));
+        if (this._filterable && this._doms.filterInput) {
+          this._filterInput = cola.widget(this._doms.input);
           inputDom = this._filterInput._doms.input;
           $fly(inputDom).on("input", (function(_this) {
             return function() {
@@ -23965,222 +24249,6 @@ Template
 
   cola.registerWidget(cola.YearMonthDropDown);
 
-  oldErrorTemplate = $.fn.form.settings.templates.error;
-
-  $.fn.form.settings.templates.error = function(errors) {
-    var ref;
-    if (errors.length === 1 && ((ref = errors[0]) != null ? ref.form : void 0) instanceof cola.Form) {
-      errors = errors[0].form._errors;
-    }
-    if (errors.length === 0) {
-      return "";
-    } else {
-      return oldErrorTemplate.call(this, errors);
-    }
-  };
-
-  cola.Form = (function(superClass) {
-    extend(Form, superClass);
-
-    Form.tagName = "c-form";
-
-    Form.CLASS_NAME = "form";
-
-    Form.attributes = {
-      bind: {
-        setter: function(bindStr) {
-          return this._bindSetter(bindStr);
-        }
-      },
-      state: {
-        setter: function(state) {
-          var STATES, classPool, cls, p;
-          if (this._state === state) {
-            return;
-          }
-          this._state = state;
-          if (this._dom) {
-            STATES = this.constructor.STATES;
-            classPool = new cola.ClassNamePool(this._dom.className);
-            for (p in STATES) {
-              cls = STATES[p];
-              classPool.remove(cls);
-            }
-            if (state) {
-              classPool.add(STATES[state]);
-            }
-            this._dom.className = classPool.join();
-          }
-        }
-      }
-    };
-
-    Form.STATES = {
-      "error": "error",
-      "warning": "warning",
-      "info": "success"
-    };
-
-    function Form(config) {
-      this._messageHolder = new cola.Entity.MessageHolder();
-      this._errors = [];
-      Form.__super__.constructor.call(this, config);
-    }
-
-    Form.prototype._initDom = function(dom) {
-      var $dom;
-      $dom = $(dom);
-      if (this._state) {
-        $dom.addClass(this._state);
-      }
-      this._inline = $dom.find(".ui.message").length === 0;
-      cola.ready((function(_this) {
-        return function() {
-          $dom.xAppend({
-            tagName: "input",
-            type: "hidden",
-            value: "mockValue",
-            "data-validate": "__mockField"
-          }).form({
-            on: "_disabled",
-            revalidate: false,
-            inline: _this._inline,
-            fields: {
-              __mockField: {
-                identifier: "__mockField",
-                rules: [
-                  {
-                    type: "empty",
-                    prompt: {
-                      form: _this,
-                      search: function() {
-                        return -1;
-                      },
-                      replace: function() {
-                        return this;
-                      }
-                    }
-                  }
-                ]
-              }
-            }
-          });
-        };
-      })(this));
-    };
-
-    Form.prototype._filterDataMessage = function(path, type, arg) {
-      return type === cola.constants.MESSAGE_REFRESH || type === cola.constants.MESSAGE_CURRENT_CHANGE || type === cola.constants.MESSAGE_VALIDATION_STATE_CHANGE;
-    };
-
-    Form.prototype._processDataMessage = function(path, type, arg) {
-      var entity;
-      entity = this._bindInfo.expression.evaluate(this._scope, "never");
-      if (entity && entity instanceof cola.Entity) {
-        this._resetEntityMessages();
-      } else {
-        entity = null;
-      }
-      this._entity = entity;
-      this._refreshState();
-    };
-
-    Form.prototype._getEntity = function() {
-      if (this._entity) {
-        return this._entity;
-      }
-      return this._scope.get();
-    };
-
-    Form.prototype._refreshState = function() {
-      var errors, keyMessage, len1, m, messages, n, state, type;
-      if (!this._$dom) {
-        return;
-      }
-      state = null;
-      keyMessage = this._messageHolder.getKeyMessage();
-      type = keyMessage != null ? keyMessage.type : void 0;
-      if (type === "error" && !this._inline) {
-        errors = this._errors;
-        errors.length = 0;
-        messages = this._messageHolder.findMessages(null, type);
-        if (messages) {
-          for (n = 0, len1 = messages.length; n < len1; n++) {
-            m = messages[n];
-            if (m.text) {
-              errors.push(m.text);
-            }
-          }
-        }
-        if (errors.length > 0) {
-          this._$dom.form("add errors", errors);
-          state = type;
-        } else {
-          this._$dom.find(".error.message").empty();
-        }
-      }
-      this._$dom.form("set value", "__mockField", type === "error" ? "" : "mockValue");
-      this.set("state", state);
-    };
-
-    Form.prototype._resetEntityMessages = function() {
-      var entity, len1, message, messageHolder, messages, n;
-      if (!this._$dom) {
-        return;
-      }
-      messageHolder = this._messageHolder;
-      messageHolder.clear("fields");
-      entity = this._getEntity();
-      if (entity) {
-        messages = entity.findMessages();
-        if (messages) {
-          for (n = 0, len1 = messages.length; n < len1; n++) {
-            message = messages[n];
-            messageHolder.add("fields", message);
-          }
-        }
-      }
-    };
-
-    Form.prototype.setMessages = function(messages) {
-      var len1, message, messageHolder, n;
-      messageHolder = this._messageHolder;
-      messageHolder.clear();
-      if (messages) {
-        for (n = 0, len1 = messages.length; n < len1; n++) {
-          message = messages[n];
-          messageHolder.add("$", message);
-        }
-      }
-      this._refreshState();
-    };
-
-    Form.prototype.setFieldMessages = function(editor, message) {
-      var editorDom;
-      if (this._inline) {
-        editorDom = editor._$dom.find("input, textarea, select")[0];
-        if (editorDom) {
-          editorDom.id || (editorDom.id = cola.uniqueId());
-          if ((message != null ? message.type : void 0) === "error" && message.text) {
-            this._$dom.form("add prompt", editorDom.id, message.text);
-          } else {
-            this._$dom.form("remove prompt", editorDom.id);
-          }
-        }
-      } else {
-        this._resetEntityMessages();
-        this._refreshState();
-      }
-    };
-
-    return Form;
-
-  })(cola.Widget);
-
-  cola.Element.mixin(cola.Form, cola.DataWidgetMixin);
-
-  cola.registerWidget(cola.Form);
-
   isIE11 = /Trident\/7\./.test(navigator.userAgent);
 
   cola.Textarea = (function(superClass) {
@@ -24511,6 +24579,207 @@ Template
 
   cola.registerWidget(cola.SelectButton);
 
+  cola.Form = (function(superClass) {
+    extend(Form, superClass);
+
+    Form.tagName = "c-form";
+
+    Form.CLASS_NAME = "form";
+
+    Form.attributes = {
+      bind: null
+    };
+
+    function Form(config) {
+      this._messageHolder = new cola.Entity.MessageHolder();
+      Form.__super__.constructor.call(this, config);
+    }
+
+    Form.prototype._initDom = function(dom) {
+      Form.__super__._initDom.call(this, dom);
+      this._$messages = this.get$Dom().find("messages, .ui.message").addClass("messages");
+    };
+
+    Form.prototype.refreshMessages = function() {
+      var field, fieldDom, fieldDoms, keyMessage, len1, len2, m, messageCosons, messageHolder, messages, n, o, state;
+      if (!this._$messages.length) {
+        return;
+      }
+      messageHolder = this._messageHolder;
+      messageHolder.clear();
+      fieldDoms = this._dom.querySelectorAll("field");
+      for (n = 0, len1 = fieldDoms.length; n < len1; n++) {
+        fieldDom = fieldDoms[n];
+        field = cola.widget(fieldDom);
+        if (field != null ? field._message : void 0) {
+          messageHolder.add("$", field != null ? field._message : void 0);
+        }
+      }
+      keyMessage = messageHolder.getKeyMessage();
+      state = keyMessage != null ? keyMessage.type : void 0;
+      messageCosons = [];
+      messages = messageHolder.findMessages(null, state);
+      if (messages) {
+        for (o = 0, len2 = messages.length; o < len2; o++) {
+          m = messages[o];
+          if (m.text) {
+            messageCosons.push({
+              tagName: "li",
+              content: m.text
+            });
+          }
+        }
+      }
+      this._$dom.removeClass("error warning success").addClass(state);
+      this._$messages.removeClass("error warning success").addClass(state).empty();
+      if (messageCosons.length > 0) {
+        this._$messages.xAppend({
+          tagName: "ul",
+          "class": "list",
+          content: messageCosons
+        });
+      }
+    };
+
+    return Form;
+
+  })(cola.Widget);
+
+  cola.registerWidget(cola.Form);
+
+  cola.Field = (function(superClass) {
+    extend(Field, superClass);
+
+    function Field() {
+      return Field.__super__.constructor.apply(this, arguments);
+    }
+
+    Field.tagName = "field";
+
+    Field.CLASS_NAME = "field";
+
+    Field.attributes = {
+      bind: {
+        setter: function(bindStr) {
+          if (this._domParsed) {
+            this._bindSetter(bindStr);
+          } else {
+            this._bind = bindStr;
+          }
+        }
+      },
+      property: null,
+      message: {
+        readOnly: true,
+        getter: function() {
+          if (this._messageDom) {
+            return this._message;
+          } else {
+
+          }
+        }
+      }
+    };
+
+    Field.prototype._parseDom = function(dom) {
+      var $label, bind, formBind, len1, n, propertyDef, ref, ref1, ref2, validator;
+      this._domParsed = true;
+      if (!this._bind && this._property) {
+        if (dom.parentNode) {
+          if (dom.parentNode.nodeName === "C-FORM") {
+            this._formDom = dom.parentNode;
+          } else if (((ref = dom.parentNode.parentNode) != null ? ref.nodeName : void 0) === "C-FORM") {
+            this._formDom = dom.parentNode.parentNode;
+          }
+        }
+        if (this._formDom) {
+          this._form = cola.widget(this._formDom);
+          formBind = (ref1 = this._form) != null ? ref1._bind : void 0;
+          if (formBind) {
+            bind = formBind + "." + this._property;
+          } else {
+            bind = this._property;
+          }
+        }
+      }
+      if (bind && dom.childElementCount === 0) {
+        dom.appendChild($.xCreate({
+          tagName: "label"
+        }));
+        dom.appendChild($.xCreate({
+          tagName: "c-input",
+          bind: bind
+        }));
+      }
+      this._labelDom = dom.querySelector("label");
+      this._messageDom = dom.querySelector("message");
+      bind = bind || this._bind;
+      if (bind) {
+        this._bind = null;
+        this._bindSetter(bind);
+        propertyDef = this.getBindingProperty();
+        if (propertyDef) {
+          $label = $fly(this._labelDom);
+          $label.text(propertyDef._caption || propertyDef._name);
+          if (propertyDef._validators) {
+            ref2 = propertyDef._validators;
+            for (n = 0, len1 = ref2.length; n < len1; n++) {
+              validator = ref2[n];
+              if (validator instanceof cola.RequiredValidator) {
+                $label.addClass("required");
+                break;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    Field.prototype._filterDataMessage = function(path, type, arg) {
+      return type === cola.constants.MESSAGE_VALIDATION_STATE_CHANGE || cola.constants.MESSAGE_REFRESH;
+    };
+
+    Field.prototype._processDataMessage = function(path, type, arg) {
+      var entity, keyMessage, ref;
+      if (type === cola.constants.MESSAGE_VALIDATION_STATE_CHANGE || cola.constants.MESSAGE_REFRESH) {
+        if ((ref = this._bindInfo) != null ? ref.writeable : void 0) {
+          entity = this._scope.get(this._bindInfo.entityPath);
+          if (entity instanceof cola.EntityList) {
+            entity = entity.current;
+          }
+          if (entity) {
+            keyMessage = entity.getKeyMessage(this._bindInfo.property);
+            this.setMessages(keyMessage);
+          }
+        }
+      }
+    };
+
+    Field.prototype.setMessages = function(message) {
+      var $message, ref;
+      this._message = message;
+      if (this._messageDom) {
+        $message = $fly(this._messageDom);
+        $message.removeClass("error warning success");
+        if (message) {
+          $message.addClass(message.type).text(message.text);
+        } else {
+          $message.empty();
+        }
+      }
+      if ((ref = this._form) != null) {
+        ref.refreshMessages();
+      }
+    };
+
+    return Field;
+
+  })(cola.Widget);
+
+  cola.Element.mixin(cola.Field, cola.DataWidgetMixin);
+
+  cola.registerWidget(cola.Field);
+
   cola.AbstractItemGroup = (function(superClass) {
     extend(AbstractItemGroup, superClass);
 
@@ -24729,8 +24998,15 @@ Template
           this._setCurrentItemDom(currentItemDom);
         }
       },
+      currentPageOnly: null,
       highlightCurrentItem: {
-        type: "boolean"
+        type: "boolean",
+        defaultValue: true
+      },
+      focusable: {
+        type: "boolean",
+        refreshDom: true,
+        defaultValue: false
       }
     };
 
@@ -24817,7 +25093,13 @@ Template
           };
         })(this));
       }
-      this._$dom = $(dom);
+      if (this._focusable) {
+        this.get$Dom().attr("tabIndex", 1).on("keydown", (function(_this) {
+          return function(evt) {
+            return _this._onKeyDown(evt);
+          };
+        })(this));
+      }
     };
 
     ItemsView.prototype.getItems = function() {
@@ -24948,6 +25230,46 @@ Template
       this._currentItemDom = currentItemDom;
       if (currentItemDom && this._highlightCurrentItem) {
         $fly(currentItemDom).addClass(cola.constants.COLLECTION_CURRENT_CLASS);
+      }
+    };
+
+    ItemsView.prototype._getFirstItemDom = function() {
+      var itemDom;
+      itemDom = this._doms.itemsWrapper.firstChild;
+      while (itemDom) {
+        if (itemDom._itemType) {
+          return itemDom;
+        }
+        itemDom = itemDom.nextSibling;
+      }
+    };
+
+    ItemsView.prototype._getLastItemDom = function() {
+      var itemDom;
+      itemDom = this._doms.itemsWrapper.lastChild;
+      while (itemDom) {
+        if (itemDom._itemType) {
+          return itemDom;
+        }
+        itemDom = itemDom.previousSibling;
+      }
+    };
+
+    ItemsView.prototype._getPreviousItemDom = function(itemDom) {
+      while (itemDom) {
+        itemDom = itemDom.previousSibling;
+        if (itemDom != null ? itemDom._itemType : void 0) {
+          return itemDom;
+        }
+      }
+    };
+
+    ItemsView.prototype._getNextItemDom = function(itemDom) {
+      while (itemDom) {
+        itemDom = itemDom.nextSibling;
+        if (itemDom != null ? itemDom._itemType : void 0) {
+          return itemDom;
+        }
       }
     };
 
@@ -25186,6 +25508,32 @@ Template
         target = target.parentNode;
       }
       return itemDom;
+    };
+
+    ItemsView.prototype._onKeyDown = function(evt) {
+      var itemDom;
+      switch (evt.keyCode) {
+        case 38:
+          if (this._currentItemDom) {
+            itemDom = this._getPreviousItemDom(this._currentItemDom);
+          } else {
+            itemDom = this._getFirstItemDom();
+          }
+          if (itemDom) {
+            this._setCurrentItemDom(itemDom);
+          }
+          return false;
+        case 40:
+          if (this._currentItemDom) {
+            itemDom = this._getNextItemDom(this._currentItemDom);
+          } else {
+            itemDom = this._getFirstItemDom();
+          }
+          if (itemDom) {
+            this._setCurrentItemDom(itemDom);
+          }
+          return false;
+      }
     };
 
     ItemsView.prototype._onItemClick = function(evt) {
@@ -28359,7 +28707,8 @@ Template
         type: "boolean"
       },
       changeCurrentItem: {
-        type: "boolean"
+        type: "boolean",
+        defaultValue: true
       },
       pullDown: {
         readOnlyAfterCreate: true
@@ -32187,7 +32536,7 @@ Template
           } else {
             templateName = "template";
           }
-          column[templateName] = child;
+          column[templateName] = this.trimTemplate(child);
         } else if (nodeName === "COLUMN") {
           subColumn = this._parseColumnDom(child);
           if (column.columns == null) {
@@ -33054,6 +33403,8 @@ Template
 
     Pager.tagName = "c-pager";
 
+    Pager.CLASS_NAME = "ui menu pager secondary";
+
     Pager.attributes = {
       bind: {
         setter: function(bindStr) {
@@ -33078,18 +33429,52 @@ Template
       };
       this._pagerItemConfig = {
         firstPage: {
-          icon: "large angle double left",
+          icon: "angle double left",
+          "class": "page-item",
           click: function() {
             var ref;
             return (ref = pager._getBindItems()) != null ? ref.firstPage() : void 0;
           }
         },
         prevPage: {
-          icon: "large angle left",
+          icon: "angle left",
+          "class": "page-item",
           click: function() {
             var data;
             data = pager._getBindItems();
             return data != null ? data.previousPage() : void 0;
+          }
+        },
+        pageSize: {
+          $type: "input",
+          "class": "page-item page-size",
+          inputType: "number",
+          initDom: function(self, arg) {
+            self.get$Dom().find("input").attr("min", 0);
+          },
+          keyDown: function(self, arg) {
+            var k;
+            k = arg.keyCode;
+            if (k === 190) {
+              return event.preventDefault();
+            }
+          },
+          change: function(self, arg) {
+            var collection, value;
+            value = arg.value;
+            collection = pager._getBindItems();
+            if (collection) {
+              if (value) {
+                value = parseInt(value);
+              }
+              if (value === collection.pageSize) {
+                return;
+              }
+              if (collection instanceof cola.EntityList) {
+                collection.pageSize = value;
+                return cola.util.flush(collection);
+              }
+            }
           }
         },
         goto: {
@@ -33150,7 +33535,8 @@ Template
           }
         },
         nextPage: {
-          icon: "large angle right",
+          icon: "angle right",
+          "class": "page-item",
           click: function() {
             var data;
             data = pager._getBindItems();
@@ -33158,7 +33544,8 @@ Template
           }
         },
         lastPage: {
-          icon: "large angle double right",
+          icon: "angle double right",
+          "class": "page-item",
           click: function() {
             var data;
             data = pager._getBindItems();
@@ -33207,7 +33594,7 @@ Template
             beforeChild = childNode;
           } else {
             if (pageItemKey === "info") {
-              menuItem = new cola.menu.MenuItem();
+              menuItem = new cola.menu.ControlMenuItem();
             } else {
               menuItem = new cola.menu.MenuItem(pageItem);
             }
@@ -33239,6 +33626,18 @@ Template
           }
         } else if (pageCode === "goto") {
           propName = "goto";
+          itemConfig = {
+            dom: childNode,
+            control: this._pagerItemConfig[pageCode]
+          };
+          menuItem = new cola.menu.ControlMenuItem(itemConfig);
+          if (right) {
+            this.addRightItem(menuItem);
+          } else {
+            this.addItem(menuItem);
+          }
+        } else if (pageCode === "pageSize") {
+          propName = "pageSize";
           itemConfig = {
             dom: childNode,
             control: this._pagerItemConfig[pageCode]
@@ -33356,6 +33755,12 @@ Template
               control: this._pagerItemConfig[config]
             };
             menuItem = new cola.menu.ControlMenuItem(itemConfig);
+          } else if (config === "pageSize") {
+            propName = config;
+            itemConfig = {
+              control: this._pagerItemConfig[config]
+            };
+            menuItem = new cola.menu.ControlMenuItem(itemConfig);
           } else if (config === "info") {
             propName = config;
             menuItem = new cola.menu.MenuItem();
@@ -33396,19 +33801,23 @@ Template
     };
 
     Pager.prototype.pagerItemsRefresh = function() {
-      var data, gotoInput, hasNext, hasPrev, infoItem, infoItemDom, pageCount, pageNo, pager, ref, ref1, ref2, ref3, ref4, ref5;
+      var data, descDom, gotoInput, gotoInputControl, gotoItem, hasNext, hasPrev, infoItem, infoItemDom, pageCount, pageNo, pageSize, pageSizeDom, pageSizeInput, pageSizeItem, pager, ref, ref1, ref2, ref3, ref4, totalEntityCount;
       pager = this;
       data = pager._getBindItems();
       hasPrev = false;
       hasNext = false;
       pageNo = 0;
       pageCount = 0;
+      totalEntityCount = 0;
+      pageSize = 0;
       if (data) {
         pageCount = parseInt((data.totalEntityCount + data.pageSize - 1) / data.pageSize);
+        totalEntityCount = data.totalEntityCount;
         hasPrev = data.pageNo > 1;
         hasNext = pageCount > data.pageNo;
         pageNo = data.pageNo;
         pageCount = data.pageCount;
+        pageSize = data.pageSize;
       }
       this._pageNo = pageNo;
       if ((ref = pager._pagerItemMap["firstPage"]) != null) {
@@ -33426,11 +33835,37 @@ Template
       infoItem = pager._pagerItemMap["info"];
       if (infoItem) {
         infoItemDom = infoItem.nodeType === 1 ? infoItem : infoItem.getDom();
-        $(infoItemDom).text(cola.resource("cola.pager.info", pageNo, pageCount));
+        $(infoItemDom).addClass("page-item desc").text(cola.resource("cola.pager.info", pageNo, pageCount, totalEntityCount));
       }
-      gotoInput = (ref4 = pager._pagerItemMap["goto"]) != null ? ref4.get("control") : void 0;
-      if (gotoInput) {
-        return (ref5 = cola.widget(gotoInput)) != null ? ref5.set("value", pageNo) : void 0;
+      gotoItem = pager._pagerItemMap["goto"];
+      if (gotoItem) {
+        gotoInput = gotoItem.get("control");
+        if (gotoInput) {
+          gotoInputControl = cola.widget(gotoInput);
+          if (gotoInputControl != null) {
+            gotoInputControl.set("value", pageNo);
+          }
+          if (gotoInputControl != null) {
+            gotoInputControl.get$Dom().parent().addClass("page-item desc");
+          }
+        }
+      }
+      pageSizeItem = pager._pagerItemMap["pageSize"];
+      if (pageSizeItem) {
+        pageSizeDom = pageSizeItem.nodeType === 1 ? pageSizeItem : pageSizeItem.getDom();
+        descDom = $(pageSizeDom).find(">.page-size-desc");
+        $(pageSizeDom).addClass("page-item desc");
+        if (!descDom.length) {
+          $(pageSizeDom).prepend($.xCreate({
+            tagName: "span",
+            "class": "page-size-desc",
+            content: cola.resource("cola.pager.pageSize")
+          }));
+        }
+        pageSizeInput = pageSizeItem.get("control");
+        if (pageSizeInput) {
+          return (ref4 = cola.widget(pageSizeInput)) != null ? ref4.set("value", pageSize) : void 0;
+        }
       }
     };
 

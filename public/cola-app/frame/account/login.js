@@ -48,9 +48,8 @@ cola(function (model) {
     }
     model.action({
         signIn: function () {
-            cola.widget("formSignIn").setMessages(null);
             if (!model.get().validate()) {
-                showMessage("用户名或密码不能为空！");
+                //showMessage("用户名或密码不能为空！");
                 return
             }
             submit();

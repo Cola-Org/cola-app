@@ -1,5 +1,6 @@
 var express = require('express');
 var path = require('path');
+var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -13,19 +14,18 @@ var example = require('./routes/example');
 
 var app = express();
 
+// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-	extended: false
-}));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
-app.use(require('coffee-middleware')(path.join(__dirname, 'public')));
-app.use(express["static"](path.join(__dirname, 'public')));
-app.use(express["static"](path.join(__dirname, 'data')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
 	secret: 'recommand 128 bytes random string',
@@ -47,33 +47,22 @@ app.use('/cola-app', colaApp);
 app.use('/service', service);
 app.use('/example', example);
 
-app.use(function(req, res, next) {
-	var err;
-	err = new Error('Not Found');
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+	var err = new Error('Not Found');
 	err.status = 404;
-	return next(err);
+	next(err);
 });
 
-if (app.get('env') === 'development') {
-	app.use(function(err, req, res, next) {
-		res.status(err.status || 500);
-		return res.render('cola-app/frame/404', {
-			message: err.message,
-			error: err
-		});
-	});
-}
+// error handler
+app.use(function (err, req, res, next) {
+	// set locals, only providing error in development
+	res.locals.message = err.message;
+	res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-app.use(function(err, req, res, next) {
+	// render the error page
 	res.status(err.status || 500);
-	return res.render('cola-app/frame/500', {
-		message: err.message,
-		error: {}
-	});
-});
-
-process.on('uncaughtException', function(err) {
-	return console.log('Uncaught Exception: ', err);
+	res.render(`cola-app/frame/${err.status == 404 ? '404' : '500'}`);
 });
 
 module.exports = app;

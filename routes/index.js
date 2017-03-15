@@ -1,11 +1,11 @@
 var express = require('express');
 var router = express.Router();
 
-router.get(['/mobile', '/mobile/home', '/mobile/my'], function(req, res, next) {
+router.get(['/mobile', '/mobile/home', '/mobile/my'], function (req, res, next) {
 	return res.render('cola-app/mobile/shell');
 });
 
-router.get('/frame/main', function(req, res, next) {
+router.get('/frame/main', function (req, res, next) {
 	if (req.session.authenticated) {
 		return res.render('cola-app/frame/main');
 	} else {
@@ -13,17 +13,17 @@ router.get('/frame/main', function(req, res, next) {
 	}
 });
 
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
 	if (req.data.uaInfo.mobile) {
 		return res.redirect('/mobile');
 	}
 	else {
-		return res.redirect('/readme');
+		return res.redirect('/welcome');
 	}
 });
 
-router.get('/readme', function(req, res, next) {
-	return res.render('readme');
+router.get('/welcome', function (req, res, next) {
+	return res.render('welcome');
 });
 
 module.exports = router;
