@@ -1,0 +1,128 @@
+/* Colors */
+/* Font Color */
+/* Background Color */
+/* Border Color */
+/* Theme Color */
+/* Input */
+/* main page */
+@font-face {
+  font-family: "iconfont";
+  src: url(../resources/font/iconfont.ttf);
+}
+.iconfont {
+  font-family: iconfont !important;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+}
+.icon-person:before {
+  content: "\e679";
+}
+.icon-course-type:before {
+  content: "\e668";
+}
+.icon-teacher:before {
+  content: "\e603";
+}
+.icon-tongji:before {
+  content: "\e61e";
+}
+.icon-icon-question:before {
+  content: "\e669";
+}
+.icon-icon-setting:before {
+  content: "\e62a";
+}
+.icon-user:before {
+  content: "\e604";
+}
+.icon-close:before {
+  content: "\e6b4";
+}
+.icon-classroom1:before {
+  content: "\e64a";
+}
+.icon-chart:before {
+  content: "\e629";
+}
+.icon-banben:before {
+  content: "\e60c";
+}
+.icon-course1:before {
+  content: "\e62c";
+}
+.icon-test:before {
+  content: "\e641";
+}
+.icon-version:before {
+  content: "\e649";
+}
+.icon-course2:before {
+  content: "\e634";
+}
+.icon-classroom:before {
+  content: "\e646";
+}
+.icon-xuexiao-copy:before {
+  content: "\e60e";
+}
+.icon-basedata:before {
+  content: "\e64e";
+}
+.icon-create:before {
+  content: "\e610";
+}
+.icon-school:before {
+  content: "\e619";
+}
+.icon-kaikebanji:before {
+  content: "\e709";
+}
+.icon-icon-courseware:before {
+  content: "\e62b";
+}
+.icon-course3:before {
+  content: "\e633";
+}
+.icon-banji:before {
+  content: "\e63d";
+}
+.icon-laoshi1:before {
+  content: "\e61f";
+}
+.icon-banji1:before {
+  content: "\e600";
+}
+.icon-file:before {
+  content: "\e607";
+}
+.icon-course-time:before {
+  content: "\e7b7";
+}
+.icon-my-student:before {
+  content: "\e601";
+}
+.icon-icon-course:before {
+  content: "\e60d";
+}
+html body {
+  font-size: 16px;
+  color: #323a45;
+  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;
+  overflow: auto;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  background: #f5f5f5;
+}
+html body .ui.layer.open > .v-box > .header-bar > .back-button {
+  background-color: #41cddb !important;
+  color: rgba(255, 255, 255, 0.9);
+  -webkit-box-shadow: 4px 4px 50px -8px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 4px 4px 50px -8px rgba(0, 0, 0, 0.75);
+  box-shadow: 4px 4px 50px -8px rgba(0, 0, 0, 0.75);
+  width: 3rem;
+  height: 3rem;
+}
+html body .ui.layer.open > .v-box > .header-bar > .back-button > .icon {
+  vertical-align: middle;
+}

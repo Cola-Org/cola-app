@@ -1,0 +1,125 @@
+/* 主色调定义 */
+@primaryColor: #18a689;
+@lightPrimaryColor: lighten(@primaryColor, 10%);
+@darkPrimaryColor: darken(@primaryColor, 15%);
+
+@secondaryColor: #e59f52;
+@lightSecondaryColor: lighten(@secondaryColor, 10%);
+@darkSecondaryColor: darken(@secondaryColor, 15%);
+
+@tertiaryColor: #293846;
+@lightTertiaryColor: lighten(@tertiaryColor, 4%);
+@darkTertiaryColor: darken(@tertiaryColor, 4%);
+
+@fourthlyColor: #23c6c8;
+@lightFourthlyColor: lighten(@fourthlyColor, 4%);
+@darkFourthlyColor: darken(@fourthlyColor, 8%);
+
+@fifthlyColor: #d93e50;
+@lightFifthlyColor: lighten(@fifthlyColor, 10%);
+@darkFifthlyColor: darken(@fifthlyColor, 15%);
+
+/* 文字内容色调定义 */
+@fontColor: rgb(103, 106, 108);
+@invertedFontColor: rgba(255, 255, 255, 0.9);
+
+@linkFontColor: @primaryColor;
+@primaryColorLinkFontColor: @linkFontColor;
+@secondaryLinkFontColor: rgb(35, 198, 200);
+@tertiaryLinkFontColor: @lightPrimaryColor;
+
+@descriptionFontColor: fadeout(@fontColor, 30%);
+@secondaryDescriptionFontColor: fadeout(@primaryColor, 40%);
+@tertiaryDescriptionFontColor: fadeout(@secondaryColor, 40%);
+/* 背景色调定义 */
+@backgroundColor: #f3f3f4;
+@contentBackgroundColor: #fff;
+@lightBackgroundColor: lighten(@backgroundColor, 3%);
+@darkBackgroundColor: darken(@backgroundColor, 3%);
+
+/* 边框色调定义 */
+@dividerBorderColor: #e0e0e0;
+@lightDividerBorderColor: #ededed;
+@borderColor: @dividerBorderColor;
+@lightBorderColor: @lightDividerBorderColor;
+
+/* 主题色定义 */
+@positiveColor: @primaryColor;
+@positiveBackgroundColor: #FCFFF5;
+@positiveBorderColor: #A3C293;
+@positiveHeaderColor: @darkPrimaryColor;
+@positiveTextColor: @darkPrimaryColor;
+
+@negativeColor: @secondaryColor;
+@negativeBackgroundColor: #FFF6F6;
+@negativeBorderColor: @secondaryColor;
+@negativeHeaderColor: @darkSecondaryColor;
+@negativeTextColor: @darkSecondaryColor;
+
+@infoColor: #31CCEC;
+@infoBackgroundColor: #F8FFFF;
+@infoBorderColor: #A9D5DE;
+@infoHeaderColor: #0E566C;
+@infoTextColor: #276F86;
+
+@warningColor: #F2C037;
+@warningBorderColor: #C9BA9B;
+@warningBackgroundColor: #FFFAF3;
+@warningHeaderColor: #794B02;
+@warningTextColor: #573A08;
+
+@nprogressColor: @primaryColor;
+
+/* Input */
+@inputBorderColor: @borderColor;
+@focusedInputBorderColor: @primaryColor;
+
+@subtleShadow: 0px 1px 2px 0 @borderColor;
+@floatingShadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+
+/* main page */
+@pageHeaderHeight: 60px;
+@pageHeaderBackgroundColor: @primaryColor;
+@appNameFontColor: #fff;
+@appNameFontSize: 1.4em;
+@pageHeaderTopMenuItemBackgroundColor: @darkPrimaryColor;
+@appMsgIconColor: @invertedFontColor;
+@appMsgBadgeMailItemBackgroundColor: #2f886e;
+@appMsgBadgeTaskItemBackgroundColor: @secondaryColor;
+@appMsgIconSize: 20px;
+
+@subtleShadow: 0px 1px 2px 0 @borderColor;
+@floatingShadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+
+@leftMenuWidth: 14em;
+@leftMenuBarBackgroundColor: @lightTertiaryColor;
+@leftMenuBarIconColor: rgba(255, 255, 255, 0.7);
+@leftMenuItemIconColor: #aeb9c2;
+@leftMenuItemFontColor: rgba(255, 255, 255, 0.85);
+@oneLevelMenuBackgroundColor: @darkTertiaryColor;
+@oneLevelMenuHoverBackgroundColor: @lightTertiaryColor;
+@menuHighlightBoxShadow: inset 3px 0px 0px 0px @primaryColor;
+
+@frameRightContainer: rgba(232, 236, 239, 0.498039215686275);
+
+@subMenuLayerTitleBackgroundColor: #D9DEE4;
+@subMenuLayerTitleFontColor: #000000;
+@subMenuLayerTitleIconColor: rgba(72, 179, 221, 0.81);
+@subMenuTreeBackgroundColor: @backgroundColor;
+@subMenuTreeNodeBackgroundColor: @lightBackgroundColor;
+@subMenuTreeNodeIconColor: #aeb9c2;
+@subMenuLayerBarIconColor: @lightTertiaryColor;
+
+@viewTabPadding: 0.8em 0 0 0.8em;
+@viewTabButtonBoxShadow: 0px 0px 4px rgba(0, 0, 0, 0.0980392156862745);
+@viewTabBoxShadow: @viewTabButtonBoxShadow;
+@viewTabBarHeight: 36px;
+@viewTabButtonRadius: 4px;
+@viewTabSpacing: 4px;
+@viewTabBorderRight: none;
+@viewTabBarBackgroundColor: transparent;
+@viewTabBackgroundColor: #fff;
+@viewTabActiveBackgroundColor: #fff;
+@viewTabContentsBoxShadow: @viewTabButtonBoxShadow;
+
+@cardBoxShadow: 0 1px 2px 0 rgba(34, 36, 38, .15);

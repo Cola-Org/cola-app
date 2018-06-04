@@ -1,0 +1,69 @@
+@import "_global.less";
+
+@spacing: 8px;
+@hSpacing: 28px;
+@headerHeight: 48px;
+@footerHeight: 40px;
+
+@bannerHeight: 46px;
+@bannerBackgroundColor: #e9eff1;
+@borderColor: rgba(0, 0, 0, 0);
+@red: #DB2828;
+@orange: #F2711C;
+@yellow: #FBBD08;
+@olive: #B5CC18;
+@green: #21BA45;
+@teal: #00B5AD;
+@blue: #2185D0;
+@violet: #6435C9;
+@purple: #A333C8;
+@pink: #ff4081;
+@brown: #A5673F;
+@grey: #767676;
+@black: #1B1C1D;
+@tableHighlightRowBackground: fade(@primaryColor, 10);
+@portalBorder: 1px solid rgba(0, 0, 0, 0);
+@fontColor: rgba(0, 0, 0, 0.7);
+@invertedFontColor: rgba(255, 255, 255, 1);
+
+@lightBackgroundColor: rgba(180, 180, 180, 0.2);
+@blockBackgroundColor: @lightBackgroundColor;
+
+@darkBackgroundColor: rgba(180, 180, 180, 0.4);
+@tableContentColor: rgba(248, 248, 248, 0.85);
+@selectedBackgroundColor: @secondaryColor;
+@linkColor: #9dd0ff;
+@layerBackgroundColor: #fff;
+@layerCurrentBlockColor: @primaryColor;
+@layerButtonColor: rgba(14, 20, 25, 0.7);
+@header-bar-height: 48px;
+
+.layer-background() {
+	background-color: #f8f8f8;
+}
+
+.header-bar() {
+	background: @primaryColor !important;
+	color: #fff !important;
+	height: @header-bar-height;
+	vertical-align: top;
+	> .back-button {
+		float: left;
+		color: #fff;
+		background: transparent;
+		width: 3em;
+		line-height: @header-bar-height;
+		padding: 0 !important;
+	}
+	> .title {
+		line-height: @header-bar-height;
+		color: #fff;
+		font-size: 110%;
+		text-align: left;
+	}
+	> .actions {
+		position: absolute;
+		right: 0;
+		top: 6px;
+	}
+}

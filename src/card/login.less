@@ -1,0 +1,63 @@
+@import "../cola-app/_global_mobile.less";
+
+#subViewLogin {
+	#containerSignIn {
+		width: 100%;
+		height: 100%;
+		display: block;
+		margin: 1em auto;
+	}
+	#formSignIn {
+		color: @fontColor;
+		position: absolute;
+		left: 50%;
+		top: 45%;
+		width: 28em;
+		margin-left: -14em;
+		margin-top: -12em;
+		background: rgba(255, 255, 255, 0.75);
+		.border-radius(4px);
+		.box-shadow(0 0 30px 15px rgba(34, 36, 38, 0.5));
+
+		transition-duration: 500ms;
+		transition-property: transform, opacity;
+		&.reserve {
+			.opacity(0);
+			.transform(translateY(-100%));
+		}
+
+		.title {
+			font-size: 150%;
+			margin-bottom: 0.75em;
+		}
+		.ui.message.error {
+			color: #a62e2d;
+		}
+		.ui.header {
+			color: #fff;
+			font-size: 1.5em;
+			font-weight: 400;
+		}
+		a.forget-password {
+			position: absolute;
+			right: 34px;
+		}
+
+		#buttonSignIn {
+			margin: 0;
+		}
+
+		.ui.field {
+			margin: 0.25em 0;
+		}
+		.ui.field.error {
+			display: none !important;
+			font-weight: bold;
+		}
+		&.error {
+			.ui.field.error {
+				display: inline-flex !important;
+			}
+		}
+	}
+}

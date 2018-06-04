@@ -1,0 +1,90 @@
+/* Colors */
+/* Font Color */
+/* Background Color */
+/* Border Color */
+/* Theme Color */
+/* Input */
+/* main page */
+#subViewHome {
+  background-color: #f8f8f8;
+}
+#subViewHome > .content {
+  position: relative;
+}
+#subViewHome > .content > v-box > box.header {
+  color: #ffffff;
+  background-color: #41cddb;
+}
+#subViewHome > .content > v-box > box.header > .menu {
+  font-size: 1.4rem;
+}
+#subViewHome > .content > v-box > box.header > .menu .avatar {
+  border: 1px solid #ffffff;
+}
+#subViewHome > .content > v-box > box.header > .menu .username {
+  margin-right: 1rem;
+  font-size: 1rem;
+}
+#subViewHome > .content .ground {
+  display: block;
+  height: 100%;
+  position: relative;
+}
+#subViewHome > .content .container {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 50%;
+  -webkit-transform: translateY(-57%);
+  -moz-transform: translateY(-57%);
+  -ms-transform: translateY(-57%);
+  -o-transform: translateY(-57%);
+  transform: translateY(-57%);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+#subViewHome > .content .container > li {
+  display: inline-block;
+  padding: 0.5em;
+}
+#subViewHome > .content .container > li .menu-item {
+  border-radius: 4px;
+  position: relative;
+  display: block;
+  background-color: rgba(255, 255, 255, 0.6);
+  padding: 0.35em;
+  -webkit-box-shadow: 0 0 12px 5px rgba(34, 36, 38, 0.1);
+  -moz-box-shadow: 0 0 12px 5px rgba(34, 36, 38, 0.1);
+  box-shadow: 0 0 12px 5px rgba(34, 36, 38, 0.1);
+  transition-duration: 500ms;
+  transition-property: transform, opacity;
+}
+#subViewHome > .content .container > li .menu-item > div .header {
+  line-height: 3.75em;
+}
+#subViewHome > .content .container > li .menu-item > div .header label {
+  font-size: 125%;
+  display: block;
+  text-align: center;
+  letter-spacing: 2px;
+}
+#subViewHome > .content .container > li .menu-item > div .image {
+  border-radius: 4px;
+  width: 25vw;
+  height: 19.2vw;
+  background-size: cover;
+}
+#subViewHome > .content .container > li .menu-item.reserve {
+  -webkit-transform: translateY(-50%) scale(0.85) !important;
+  -moz-transform: translateY(-50%) scale(0.85) !important;
+  -ms-transform: translateY(-50%) scale(0.85) !important;
+  -o-transform: translateY(-50%) scale(0.85) !important;
+  transform: translateY(-50%) scale(0.85) !important;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+#subViewHome #homeSidebar {
+  background-color: #fff;
+}

@@ -1,0 +1,148 @@
+@import "cola-app/_global_mobile.less";
+
+* {
+	-webkit-tap-highlight-color: transparent;
+}
+
+*:not(input,textarea) {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+}
+
+@header-bar-height: 48px;
+html.mobile body {
+	.ui.primary.buttons .button, .ui.primary.button,
+	.ui.positive.buttons .button, .ui.positive.button {
+		background-color: @primaryColor !important;
+	}
+	.ui.primary.buttons .button:hover,
+	.ui.primary.button:hover,
+	.ui.primary.buttons .button:focus,
+	.ui.primary.button:focus, .ui.primary.buttons .button:active,
+	.ui.primary.button:active, .ui.primary.buttons .active.button,
+	.ui.positive.active.button,
+	.ui.positive.buttons .button:hover,
+	.ui.positive.button:hover,
+	.ui.positive.buttons .button:focus,
+	.ui.positive.button:focus,
+	.ui.positive.buttons .button:active,
+	.ui.positive.button:active, .ui.positive.buttons .active.button,
+	.ui.positive.active.button {
+		background-color: @primaryColor !important;
+	}
+
+	.ui.secondary.buttons .button, .ui.secondary.button,
+	.ui.negative.buttons .button, .ui.negative.button {
+		background-color: @secondaryColor !important;
+	}
+	.ui.secondary.buttons .button:hover,
+	.ui.secondary.button:hover,
+	.ui.secondary.buttons .button:focus,
+	.ui.secondary.button:focus, .ui.secondary.buttons .button:active,
+	.ui.secondary.button:active, .ui.secondary.buttons .active.button,
+	.ui.negative.active.button,
+	.ui.negative.buttons .button:hover,
+	.ui.negative.button:hover,
+	.ui.negative.buttons .button:focus,
+	.ui.negative.button:focus,
+	.ui.negative.buttons .button:active,
+	.ui.negative.button:active, .ui.negative.buttons .active.button,
+	.ui.negative.active.button {
+		background-color: @secondaryColor !important;
+	}
+}
+
+.ui.layer {
+	.layer-background();
+	overflow: hidden;
+
+	> .v-box {
+		height: 100%;
+	}
+
+	&.frame, &.browser {
+		> .v-box > .header-bar {
+			.header-bar();
+
+		}
+		> .v-box > .ui.iframe {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: @header-bar-height;
+			bottom: 0;
+		}
+	}
+
+	&.open {
+		> .v-box > .header-bar {
+			background: transparent !important;
+			> .back-button {
+				position: absolute;
+				.back-button();
+			}
+			> .title {
+				display: none;
+				text-align: left;
+			}
+		}
+		> .v-box > .ui.iframe {
+			height: 100%;
+		}
+	}
+
+	&.free {
+		> .v-box > .header-bar {
+			display: none;
+		}
+		> .v-box > .flex-box {
+			overflow: hidden;
+			> .ui.iframe {
+				height: 100%;
+			}
+		}
+	}
+}
+
+.no-header {
+	.header-bar {
+		display: none;
+	}
+}
+
+.back-button() {
+	margin-left: 0.8em;
+	margin-top: 0.6em;
+	border-radius: 50%;
+	background-color: rgba(255, 255, 255, 0.75) !important;
+	.box-shadow(rgba(34, 36, 38, 0.14902) 0px 0px 0px 1px inset);
+	z-index: 100;
+	&:active {
+		//background: @activeBackgroundColor;
+	}
+}
+
+.sub-view-title() {
+	display: inline-block;
+	vertical-align: middle;
+	margin: 0 0.5em;
+	font-size: 120%;
+	font-weight: bold;
+}
+
+.item-corner() {
+	border-color: rgba(33, 133, 208, 0.75) !important;
+	color: #fff !important;
+	> .text {
+		margin-left: -1em;
+		margin-top: 1em;
+		font-size: 90%;
+		font-weight: normal;
+		-webkit-transform: rotate(-45deg);
+		transform: rotate(-45deg);
+	}
+}
+
+.band-shadow() {
+	.box-shadow(0 1px 1px 0 rgba(34, 36, 38, 0.1));
+}

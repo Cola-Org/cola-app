@@ -1,0 +1,15 @@
+form#containerSignIn(c-onsubmit="signIn()")
+	c-form#formSignIn.ui.form.reserve(style="padding:2em;")
+		field
+			.title LOGIN
+		field
+			c-input(bind="username" placeholder="用户名" postOnInput="true")
+		field
+			c-input(bind="password" placeholder="密码" inputType="password")
+		field(style="text-align:right")
+			c-checkbox#checkboxMemberMe(label="记住我" bind="rememberMe")
+			//a.state.forget-password(href="forgot-password1") 忘记密码
+		field.error
+			.ui.message.error
+		field
+			c-button#buttonSignIn.fluid.primary.large(click="login") 登录

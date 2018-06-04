@@ -1,0 +1,26 @@
+/* Colors */
+/* Font Color */
+/* Background Color */
+/* Border Color */
+/* Theme Color */
+/* Input */
+/* main page */
+#subViewProfile {
+  background-color: #f8f8f8;
+}
+#subViewProfile > .content v-box {
+  padding: 2em;
+}
+#subViewProfile > .content v-box .ui.panel {
+  margin-bottom: 2em;
+  border-radius: 8px;
+}
+#subViewProfile > .content v-box field > label {
+  width: 8em !important;
+}
+.ui.panel {
+  background-color: #fff;
+}
+.ui.panel .content img {
+  max-height: 118px;
+}

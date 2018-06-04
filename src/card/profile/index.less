@@ -1,0 +1,36 @@
+@import "../../cola-app/_global_mobile.less";
+
+@width: 70%;
+
+#subViewProfile {
+	.layer-background();
+	> .content v-box {
+		padding: 2em;
+		.ui.panel {
+			margin-bottom: 2em;
+			border-radius: 8px;
+		}
+
+		 field > label{
+			 width: 8em !important;
+		 }
+	}
+}
+
+.ui.panel {
+	//> .header > .content {
+	//	background-color: @primaryColor;
+	//	border-bottom: 1px solid @borderColor;
+	//	color: @invertedFontColor;
+	//	padding: 0 1.5rem;
+	//	>.tools>i{
+	//		color: @invertedFontColor;
+	//	}
+	//}
+	background-color: #fff;
+	.content {
+		img {
+			max-height: 118px;
+		}
+	}
+}

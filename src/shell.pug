@@ -1,0 +1,23 @@
+extends cola-app/_cola-page
+
+append head
+	link(rel="stylesheet", type="text/css", href="shell.css")
+
+block body
+	c-subView#viewMain(style="overflow:hidden; height:100%")
+		.content.v-box
+
+	#cacheDimmer.ui.inverted.dimmer
+		#cacheLoader.ui.text.loader(c-bind="loaderText")
+
+append scripts
+	//如果需要echarts支持请打开如下注释项
+	//script(src="resources/echarts/echarts.min.js")
+	//script(src="resources/echarts/macarons.js")
+	script(src="resources/jquery/jquery.cookie.js")
+	//如果需要websocket支持请打开此项
+	//script(src="resources/websocket/reconnecting-websocket.min.js")
+	script(src="cola-app/mobile/app.js")
+	script(src="cola-app/config.js")
+	script(src="common.js")
+	script(src="cola-app/mobile/shell.js")

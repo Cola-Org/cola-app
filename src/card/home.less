@@ -1,0 +1,84 @@
+@import "../cola-app/_global_mobile.less";
+
+#subViewHome {
+	.layer-background();
+
+	> .content {
+		position: relative;
+		> v-box {
+			> box.header {
+				color: @invertedFontColor;
+				> .menu {
+					font-size: 1.4rem;
+					.avatar {
+						border: 1px solid @invertedFontColor;
+					}
+					.username {
+						margin-right: 1rem;
+						font-size: 1rem;
+					}
+				}
+				background-color: @primaryColor;
+			}
+		}
+		.ground {
+			display: block;
+			height: 100%;
+			position: relative;
+
+		}
+		.container {
+			position: absolute;
+			width: 100%;
+			left: 0;
+			top: 50%;
+			.transform(translateY(-57%));
+			list-style: none;
+			padding: 0;
+			margin: 0;
+			text-align: center;
+
+			> li {
+				display: inline-block;
+				padding: 0.5em;
+
+				.menu-item {
+					border-radius: 4px;
+					position: relative;
+					display: block;
+					background-color: rgba(255, 255, 255, 0.6);
+					padding: 0.35em;
+					.box-shadow(0 0 12px 5px rgba(34, 36, 38, 0.1));
+					transition-duration: 500ms;
+					transition-property: transform, opacity;
+
+					> div {
+						.header {
+							line-height: 3.75em;
+							label {
+								font-size: 125%;
+								display: block;
+								text-align: center;
+								letter-spacing: 2px
+							}
+						}
+
+						.image {
+							border-radius: 4px;
+							width: 25vw;
+							height: 19.2vw;
+							background-size: cover;
+						}
+					}
+					&.reserve {
+						.transform(translateY(-50%), scale(0.85)) !important;
+						.opacity(0);
+					}
+				}
+			}
+		}
+	}
+	#homeSidebar{
+		background-color: @contentBackgroundColor;
+	}
+}

@@ -1,0 +1,18 @@
+extends ../_cola-page
+
+append head
+	link(rel="stylesheet", type="text/css", href="cola-app/mobile/shell.css")
+
+block body
+	body
+		c-subView#viewMain(style="overflow:hidden; height:100%")
+			.content.v-box
+
+		#cacheDimmer.ui.inverted.dimmer
+			#cacheLoader.ui.text.loader(c-bind="loaderText")
+
+append scripts
+	script(src="resources/jquery/jquery.cookie.js")
+	script(src="cola-app/mobile/app.js")
+	script(src="cola-app/config.js")
+	script(src="cola-app/mobile/shell.js")

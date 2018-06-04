@@ -1,0 +1,18 @@
+v-box
+	box.header
+		c-titlebar.secondary.inverted
+			.right.menu
+				a.item.state(href="/profile")
+					span.username(c-bind="user.cname")
+					img.ui.image.avatar(c-src="getAvatarUrl(user.account.avatar)")
+	flex-box
+		.ground
+			ul.container
+				li.courseware
+					a.menu-item.icon.profire(c-onclick="enterLink('profire')" c-delay="350")
+						div
+							.content
+								.image
+							.header
+								label
+c-sidebar#homeSidebar(modalOpacity="0.2")
